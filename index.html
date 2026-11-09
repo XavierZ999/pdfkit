@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PDF Kit by Nutchapon Claude AI — เครื่องมือ PDF ครบในที่เดียว</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Sarabun:wght@400;700&family=Charmonman:wght@400;700&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@cantoo/pdf-lib@2.11.1/dist/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+<style>
+:root{
+  --bg:#f4f1ec; --surface:#ffffff; --surface2:#f8f6f2; --ink:#1c1b22; --muted:#6b6874; --line:#e4dfd6;
+  --brand:#e5542e; --brand-ink:#ffffff; --brand-soft:#fde9e2; --accent:#2c4bd6;
+  --ok:#1f8a5b; --warn:#b7791f; --danger:#c53030;
+  --radius:16px; --shadow:0 1px 2px rgba(20,16,10,.06),0 6px 20px rgba(20,16,10,.06);
+  --c-file:#2c4bd6; --c-conv:#0f8a7e; --c-size:#b7651f; --c-edit:#a8359b; --c-sec:#c0392b;
+}
+[data-theme="dark"]{
+  --bg:#141318; --surface:#1d1c23; --surface2:#25232c; --ink:#f1eff5; --muted:#a19dab; --line:#33313b;
+  --brand:#ff6b43; --brand-soft:#3a2219; --accent:#7d93ff; --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:"IBM Plex Sans Thai",system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.55;padding-bottom:86px;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent)}
+.wrap{max-width:980px;margin:0 auto;padding:0 16px}
+header.top{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+header.top .wrap{display:flex;align-items:center;gap:12px;height:60px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-weight:700;font-size:18px;letter-spacing:-.2px;cursor:pointer}
+.logo .mark{width:34px;height:34px;border-radius:10px;background:var(--brand);display:grid;place-items:center;color:#fff;font-size:13px;font-weight:700;letter-spacing:.5px}
+.logo small{display:block;font-weight:500;font-size:11.5px;color:var(--muted);margin-top:-3px}
+.spacer{flex:1}
+.iconbtn{border:1px solid var(--line);background:var(--surface);border-radius:12px;width:40px;height:40px;display:grid;place-items:center;cursor:pointer}
+.iconbtn svg{width:20px;height:20px}
+
+/* hero */
+.hero{margin:22px 0 18px;padding:26px 24px;border-radius:22px;background:var(--surface);box-shadow:var(--shadow);position:relative;overflow:hidden}
+.hero h1{margin:0 0 6px;font-size:clamp(24px,4.4vw,34px);line-height:1.2;letter-spacing:-.5px}
+.hero h1 em{font-style:normal;color:var(--brand)}
+.hero p{margin:0;color:var(--muted);max-width:560px}
+.hero .badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);font-size:12.5px;font-weight:500}
+.badge i{width:8px;height:8px;border-radius:50%;background:var(--ok);display:inline-block}
+.hero .deco{position:absolute;right:-30px;top:-30px;width:180px;height:180px;border-radius:40px;background:var(--brand-soft);transform:rotate(18deg);z-index:0}
+.hero > *:not(.deco){position:relative;z-index:1}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:0 14px;margin-bottom:18px}
+.search input{border:0;outline:0;background:transparent;height:46px;flex:1}
+.search svg{width:18px;height:18px;color:var(--muted)}
+.sec-title{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:20px 2px 10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.tool{display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:var(--radius);background:var(--surface);border:1px solid var(--line);cursor:pointer;text-align:left;transition:transform .12s,box-shadow .12s,border-color .12s}
+.tool:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:transparent}
+.tool .ti{flex:none;width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:#fff}
+.tool .ti svg{width:22px;height:22px}
+.tool b{display:block;font-size:15px;font-weight:600;margin-bottom:2px}
+.tool span{display:block;font-size:12.8px;color:var(--muted);line-height:1.45}
+
+/* tool page */
+.tool-head{display:flex;align-items:center;gap:12px;margin:20px 0 14px}
+.tool-head .ti{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;color:#fff;flex:none}
+.tool-head .ti svg{width:24px;height:24px}
+.tool-head h2{margin:0;font-size:22px;letter-spacing:-.3px}
+.tool-head p{margin:0;color:var(--muted);font-size:13.5px}
+.back{border:0;background:none;cursor:pointer;padding:6px;margin-left:-6px;border-radius:10px;color:var(--muted)}
+.back svg{width:22px;height:22px;display:block}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+.drop{border:2px dashed var(--line);border-radius:var(--radius);background:var(--surface);padding:34px 16px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s}
+.drop:hover,.drop.over{border-color:var(--brand);background:var(--brand-soft)}
+.drop svg{width:40px;height:40px;color:var(--brand)}
+.drop b{display:block;margin-top:8px;font-size:16px}
+.drop span{color:var(--muted);font-size:13px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:600;font-size:14.5px;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.sm{height:34px;padding:0 12px;font-size:13px;border-radius:10px}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn svg{width:18px;height:18px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.field{display:flex;flex-direction:column;gap:5px;min-width:140px;flex:1}
+.field label{font-size:12.5px;font-weight:600;color:var(--muted)}
+.field input[type=text],.field input[type=number],.field input[type=password],.field select,.field textarea{height:42px;border-radius:10px;border:1px solid var(--line);background:var(--surface2);padding:0 12px;outline:0}
+.field textarea{height:auto;padding:10px 12px;min-height:70px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--brand)}
+.field input[type=range]{accent-color:var(--brand)}
+.field input[type=color]{height:42px;width:100%;border:1px solid var(--line);border-radius:10px;background:var(--surface2);padding:4px}
+.fields{display:flex;flex-wrap:wrap;gap:12px}
+.check{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer}
+.check input{accent-color:var(--brand);width:18px;height:18px}
+.seg{display:inline-flex;background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;padding:7px 13px;border-radius:9px;cursor:pointer;font-weight:500;font-size:13.5px}
+.seg button.on{background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.12);color:var(--brand);font-weight:600}
+.note{font-size:13px;color:var(--muted);background:var(--surface2);border-radius:12px;padding:10px 12px;border:1px solid var(--line)}
+.note.warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 35%,transparent);background:color-mix(in srgb,var(--warn) 8%,var(--surface))}
+.filelist{display:flex;flex-direction:column;gap:8px}
+.fileitem{display:flex;align-items:center;gap:10px;padding:10px;border-radius:12px;background:var(--surface2);border:1px solid var(--line)}
+.fileitem .th{width:44px;height:56px;border-radius:6px;background:#fff;overflow:hidden;flex:none;display:grid;place-items:center;border:1px solid var(--line)}
+.fileitem .th canvas,.fileitem .th img{max-width:100%;max-height:100%;display:block}
+.fileitem .meta{flex:1;min-width:0}
+.fileitem .meta b{display:block;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fileitem .meta span{font-size:12.5px;color:var(--muted)}
+.handle{cursor:grab;color:var(--muted);padding:4px;touch-action:none}
+.handle svg{width:18px;height:18px;display:block}
+.x{border:0;background:none;cursor:pointer;color:var(--muted);padding:6px;border-radius:8px}
+.x:hover{color:var(--danger);background:var(--surface)}
+.x svg{width:18px;height:18px;display:block}
+.pages{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}
+.pg{position:relative;background:var(--surface2);border:2px solid var(--line);border-radius:12px;padding:8px 8px 6px;text-align:center;user-select:none}
+.pg .cv{height:150px;display:grid;place-items:center;overflow:hidden}
+.pg canvas{max-width:100%;max-height:150px;box-shadow:0 1px 4px rgba(0,0,0,.18);background:#fff;transition:transform .2s}
+.pg .num{font-size:12px;color:var(--muted);margin-top:4px}
+.pg .tools{position:absolute;top:6px;right:6px;display:flex;gap:4px}
+.pg .tools button{width:28px;height:28px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center;padding:0}
+.pg .tools svg{width:15px;height:15px}
+.pg.sel{border-color:var(--brand);background:var(--brand-soft)}
+.pg.sel::after{content:"✓";position:absolute;top:6px;left:6px;width:22px;height:22px;border-radius:50%;background:var(--brand);color:#fff;font-size:13px;display:grid;place-items:center}
+.pg.selectable{cursor:pointer}
+.sortable-ghost{opacity:.35}
+.results{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.res{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:8px;text-align:center}
+.res img{max-width:100%;max-height:170px;display:block;margin:0 auto 6px;box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.res span{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}
+.stat{display:flex;gap:16px;flex-wrap:wrap;align-items:baseline}
+.stat b{font-size:22px}
+.stat .down{color:var(--ok);font-weight:700}
+
+/* editor */
+.editor-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.stage-wrap{background:var(--surface2);border-radius:var(--radius);padding:16px;display:flex;justify-content:center;border:1px solid var(--line);overflow:hidden}
+.stage{position:relative;box-shadow:0 2px 14px rgba(0,0,0,.18);background:#fff;touch-action:none;line-height:0}
+.stage canvas{display:block;width:100%;height:auto}
+.ov{position:absolute;cursor:move;outline:1px dashed transparent}
+.ov img{width:100%;height:100%;display:block;pointer-events:none;user-select:none}
+.ov.sel{outline:2px solid var(--accent)}
+.ov .rz{position:absolute;right:-9px;bottom:-9px;width:18px;height:18px;border-radius:50%;background:var(--accent);border:2px solid #fff;cursor:nwse-resize;display:none}
+.ov .del{position:absolute;right:-11px;top:-11px;width:22px;height:22px;border-radius:50%;background:var(--danger);color:#fff;border:2px solid #fff;font-size:12px;line-height:16px;cursor:pointer;display:none;padding:0}
+.ov.sel .rz,.ov.sel .del{display:block}
+.pager{display:inline-flex;align-items:center;gap:6px}
+.pager span{min-width:84px;text-align:center;font-size:13.5px;font-weight:600}
+.pad{width:100%;height:200px;border:1px solid var(--line);border-radius:12px;background:#fff;touch-action:none;display:block;cursor:crosshair}
+.sigs{display:flex;gap:8px;flex-wrap:wrap}
+.sigs .sg{position:relative;border:1px solid var(--line);background:#fff;border-radius:10px;padding:6px;cursor:pointer;height:56px;display:grid;place-items:center}
+.sigs .sg img{max-height:42px;max-width:150px}
+.sigs .sg .x{position:absolute;top:-8px;right:-8px;background:var(--surface);border:1px solid var(--line);border-radius:50%;padding:2px}
+.sigs .sg .x svg{width:12px;height:12px}
+.cropbox{position:absolute;border:2px solid var(--brand);box-shadow:0 0 0 9999px rgba(0,0,0,.45)}
+.cropbox .hd{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--brand);border:3px solid #fff;margin:-11px 0 0 -11px;touch-action:none;cursor:move}
+.crop-shade{position:absolute;background:rgba(20,20,30,.55);pointer-events:none}
+.scanlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
+.scanlist .pg img{max-width:100%;max-height:150px;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+.modal{position:fixed;inset:0;background:rgba(10,10,16,.6);z-index:60;display:flex;align-items:center;justify-content:center;padding:14px}
+.modal .box{background:var(--surface);border-radius:20px;max-width:760px;width:100%;max-height:94vh;overflow:auto;padding:16px}
+
+/* nav */
+nav.bottom{position:fixed;left:50%;transform:translateX(-50%);bottom:12px;z-index:30;display:flex;gap:2px;padding:6px;border-radius:20px;background:var(--surface);box-shadow:0 8px 30px rgba(0,0,0,.18);border:1px solid var(--line);width:min(520px,calc(100% - 20px))}
+nav.bottom button{flex:1;border:0;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;border-radius:14px;color:var(--muted);font-size:11.5px;font-weight:500}
+nav.bottom button svg{width:22px;height:22px}
+nav.bottom button.on{color:var(--brand);background:var(--brand-soft)}
+nav.bottom button.scanbtn svg{color:var(--brand)}
+
+/* overlay */
+.busy{position:fixed;inset:0;z-index:80;background:rgba(10,10,16,.55);display:none;align-items:center;justify-content:center}
+.busy.on{display:flex}
+.busy .box{background:var(--surface);border-radius:18px;padding:22px 24px;min-width:260px;text-align:center;box-shadow:var(--shadow)}
+.spin{width:38px;height:38px;border-radius:50%;border:4px solid var(--line);border-top-color:var(--brand);animation:sp .8s linear infinite;margin:0 auto 12px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.bar{height:6px;border-radius:6px;background:var(--line);overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;background:var(--brand);width:0;transition:width .2s}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);opacity:0;z-index:90;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;transition:.25s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.empty{text-align:center;color:var(--muted);padding:40px 10px}
+.recent-item{display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--line)}
+.recent-item:last-child{border-bottom:0}
+.recent-item .ti{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;color:#fff;flex:none}
+.recent-item .ti svg{width:18px;height:18px}
+.recent-item .meta{flex:1;min-width:0}
+.recent-item .meta b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recent-item .meta span{font-size:12.5px;color:var(--muted)}
+footer{color:var(--muted);font-size:12.5px;text-align:center;padding:26px 0 10px}
+@media (max-width:560px){
+  .grid{grid-template-columns:1fr}
+  .hero{padding:22px 18px}
+  .pages{grid-template-columns:repeat(auto-fill,minmax(100px,1fr))}
+  .pg .cv{height:120px}.pg canvas{max-height:120px}
+}
+
+/* ================= FX layer ================= */
+:root{--ease:cubic-bezier(.2,.8,.2,1);--spring:cubic-bezier(.34,1.56,.64,1);--glass:color-mix(in srgb,var(--surface) 72%,transparent)}
+body::before,body::after{content:"";position:fixed;z-index:-1;border-radius:50%;filter:blur(80px);opacity:.55;pointer-events:none}
+body::before{width:520px;height:520px;left:-160px;top:-140px;background:radial-gradient(circle,#ffb199,transparent 70%);animation:float1 18s ease-in-out infinite alternate}
+body::after{width:560px;height:560px;right:-200px;top:30vh;background:radial-gradient(circle,#a9b8ff,transparent 70%);animation:float2 22s ease-in-out infinite alternate}
+[data-theme="dark"] body::before{background:radial-gradient(circle,#7a2c17,transparent 70%);opacity:.5}
+[data-theme="dark"] body::after{background:radial-gradient(circle,#26307a,transparent 70%);opacity:.5}
+@keyframes float1{to{transform:translate(120px,90px) scale(1.15)}}
+@keyframes float2{to{transform:translate(-110px,-80px) scale(.9)}}
+header.top{transition:box-shadow .25s,background .25s}
+header.top.scrolled{box-shadow:0 6px 24px rgba(20,16,10,.08)}
+.logo .mark{background:linear-gradient(135deg,#ff8a5c,#e5542e 55%,#c43a1c);box-shadow:0 4px 14px rgba(229,84,46,.4),inset 0 1px 0 rgba(255,255,255,.35);transition:transform .4s var(--spring)}
+.logo:hover .mark{transform:rotate(-8deg) scale(1.08)}
+.iconbtn{transition:transform .25s var(--spring),background .2s}
+.iconbtn:hover{transform:rotate(18deg) scale(1.06)}
+
+/* page transitions */
+#view > section{animation:viewIn .45s var(--ease) both}
+@keyframes viewIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.card{animation:cardIn .5s var(--ease) both;transition:box-shadow .25s}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px) scale(.99)}to{opacity:1;transform:none}}
+.fadein{animation:fadeIn .4s var(--ease) both}
+@keyframes fadeIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+
+/* hero */
+.hero{background:linear-gradient(135deg,var(--surface) 0%,color-mix(in srgb,var(--surface) 82%,var(--brand-soft)) 100%);border:1px solid color-mix(in srgb,var(--line) 60%,transparent);isolation:isolate}
+.hero .deco{background:conic-gradient(from 200deg,#ff8a5c,#ffcf6b,#7d93ff,#c86bff,#ff8a5c);opacity:.3;filter:blur(34px);width:300px;height:300px;right:-80px;top:-110px;border-radius:50%;animation:spinDeco 24s linear infinite}
+@keyframes spinDeco{to{transform:rotate(360deg)}}
+.hero h1 em{background:linear-gradient(90deg,#e5542e,#ff8a5c,#c86bff,#e5542e);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 6s linear infinite}
+@keyframes shine{to{background-position:300% 0}}
+.hero .badge{background:var(--glass);backdrop-filter:blur(6px);animation:cardIn .5s var(--ease) both}
+.hero .badge:nth-child(2){animation-delay:.08s}.hero .badge:nth-child(3){animation-delay:.16s}.hero .badge:nth-child(4){animation-delay:.24s}
+.badge i{box-shadow:0 0 0 0 rgba(31,138,91,.6);animation:pulse 2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 7px rgba(31,138,91,0)}100%{box-shadow:0 0 0 0 rgba(31,138,91,0)}}
+.search{transition:box-shadow .25s,border-color .25s;background:var(--glass);backdrop-filter:blur(8px)}
+.search:focus-within{border-color:var(--brand);box-shadow:0 0 0 4px color-mix(in srgb,var(--brand) 18%,transparent)}
+
+/* tool cards: stagger + spotlight + lift */
+.tool{position:relative;overflow:hidden;isolation:isolate;animation:cardIn .5s var(--ease) both;animation-delay:calc(var(--i,0)*35ms);transition:transform .3s var(--spring),box-shadow .3s,border-color .3s}
+.tool::before{content:"";position:absolute;inset:0;z-index:-1;opacity:0;transition:opacity .3s;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--c,var(--brand)) 16%,transparent),transparent 65%)}
+.tool:hover::before{opacity:1}
+.tool:hover{transform:translateY(-4px);box-shadow:0 14px 34px -12px color-mix(in srgb,var(--c,#000) 45%,transparent);border-color:color-mix(in srgb,var(--c,var(--brand)) 35%,transparent)}
+.tool:active{transform:translateY(-1px) scale(.985)}
+.ti{position:relative;background-image:linear-gradient(140deg,rgba(255,255,255,.3),rgba(255,255,255,0) 55%,rgba(0,0,0,.12));box-shadow:0 6px 14px -4px color-mix(in srgb,var(--c,#000) 60%,transparent),inset 0 1px 0 rgba(255,255,255,.35)}
+.tool .ti{transition:transform .45s var(--spring)}
+.tool:hover .ti{transform:rotate(-8deg) scale(1.1)}
+.sec-title{display:flex;align-items:center;gap:10px}
+.sec-title::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--line),transparent)}
+
+/* buttons */
+.btn{position:relative;overflow:hidden;transition:transform .18s var(--spring),box-shadow .25s,border-color .2s,background .2s,filter .2s}
+.btn:active:not(:disabled){transform:scale(.96)}
+.btn.primary{background:linear-gradient(135deg,#ff7a4d,var(--brand) 60%,#d0401d);border-color:transparent;box-shadow:0 6px 18px -6px rgba(229,84,46,.65),inset 0 1px 0 rgba(255,255,255,.25)}
+.btn.primary:hover:not(:disabled){box-shadow:0 10px 26px -8px rgba(229,84,46,.8),inset 0 1px 0 rgba(255,255,255,.25);transform:translateY(-1px)}
+.btn.primary::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);transition:left .6s var(--ease)}
+.btn.primary:hover::after{left:130%}
+.ripple{position:absolute;border-radius:50%;transform:scale(0);background:currentColor;opacity:.22;pointer-events:none;animation:ripple .6s var(--ease) forwards}
+@keyframes ripple{to{transform:scale(1);opacity:0}}
+.seg button{transition:background .25s,color .2s,box-shadow .25s,transform .2s var(--spring)}
+.seg button:active{transform:scale(.94)}
+.field input,.field select,.field textarea{transition:border-color .2s,box-shadow .2s}
+.field input:focus,.field select:focus,.field textarea:focus{box-shadow:0 0 0 4px color-mix(in srgb,var(--brand) 15%,transparent)}
+
+/* drop zone with marching border */
+.drop{border:0;position:relative;background:var(--glass);backdrop-filter:blur(6px);transition:transform .3s var(--spring),background .25s}
+.drop::before{content:"";position:absolute;inset:0;border-radius:var(--radius);pointer-events:none;
+  background:repeating-linear-gradient(90deg,var(--muted) 0 10px,transparent 10px 18px) top left/100% 2px no-repeat,repeating-linear-gradient(90deg,var(--muted) 0 10px,transparent 10px 18px) bottom left/100% 2px no-repeat,repeating-linear-gradient(0deg,var(--muted) 0 10px,transparent 10px 18px) top left/2px 100% no-repeat,repeating-linear-gradient(0deg,var(--muted) 0 10px,transparent 10px 18px) top right/2px 100% no-repeat;opacity:.45;transition:opacity .25s}
+.drop:hover::before,.drop.over::before{opacity:1;background-image:repeating-linear-gradient(90deg,var(--brand) 0 10px,transparent 10px 18px),repeating-linear-gradient(90deg,var(--brand) 0 10px,transparent 10px 18px),repeating-linear-gradient(0deg,var(--brand) 0 10px,transparent 10px 18px),repeating-linear-gradient(0deg,var(--brand) 0 10px,transparent 10px 18px);animation:march .9s linear infinite}
+@keyframes march{from{background-position:0 0,0 100%,0 0,100% 0}to{background-position:18px 0,-18px 100%,0 -18px,100% 18px}}
+.drop svg{transition:transform .4s var(--spring)}
+.drop:hover svg{transform:translateY(-5px)}
+.drop.over{transform:scale(1.015)}
+.drop.over svg{animation:bob .8s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-8px)}}
+
+/* thumbnails */
+.pg{transition:transform .25s var(--spring),border-color .2s,box-shadow .25s,background .2s}
+.pg:hover{transform:translateY(-3px);box-shadow:0 10px 24px -12px rgba(0,0,0,.35)}
+.pg.sel::after{animation:pop .35s var(--spring)}
+@keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+.pg .cv:empty{border-radius:6px;background:linear-gradient(100deg,var(--line) 20%,color-mix(in srgb,var(--line) 40%,var(--surface)) 40%,var(--line) 60%) 0/250% 100%;animation:shimmer 1.3s linear infinite;width:70%;margin:0 auto}
+@keyframes shimmer{to{background-position:-250% 0}}
+.pg canvas{animation:fadeIn .35s var(--ease) both}
+.pg .tools{z-index:2}.pg.sel::after{z-index:2}
+.pg .tools button{transition:transform .2s var(--spring),background .2s}
+.pg .tools button:hover{transform:scale(1.12);background:var(--brand-soft)}
+.fileitem{animation:cardIn .4s var(--ease) both;transition:box-shadow .25s}
+.fileitem:hover{box-shadow:0 6px 18px -10px rgba(0,0,0,.3)}
+.res{animation:cardIn .4s var(--ease) both}
+
+/* bottom nav: glass + sliding pill */
+nav.bottom{background:var(--glass);backdrop-filter:blur(16px) saturate(1.6);-webkit-backdrop-filter:blur(16px) saturate(1.6)}
+nav.bottom .pill{position:absolute;top:6px;bottom:6px;border-radius:14px;background:var(--brand-soft);transition:left .45s var(--spring),width .45s var(--spring),opacity .2s;z-index:0}
+nav.bottom button{position:relative;z-index:1;overflow:hidden;transition:color .25s}
+nav.bottom button.on{background:none}
+nav.bottom button svg{transition:transform .35s var(--spring)}
+nav.bottom button.on svg{transform:translateY(-2px) scale(1.1)}
+
+/* busy + toast + modal */
+.busy{backdrop-filter:blur(6px)}
+.busy .box{animation:popIn .3s var(--spring)}
+.spin{border:0;background:conic-gradient(from 0deg,transparent 0 25%,var(--brand));-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 4px));mask:radial-gradient(farthest-side,transparent calc(100% - 5px),#000 calc(100% - 4px))}
+.bar i{background:linear-gradient(90deg,#ff8a5c,var(--brand),#c86bff);background-size:200% 100%;animation:shine 1.5s linear infinite}
+@keyframes popIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+.toast{display:flex;align-items:center;gap:8px;transition:opacity .25s,transform .45s var(--spring);box-shadow:0 10px 30px -8px rgba(0,0,0,.4)}
+.toast .ic{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none}
+.toast .ic.ok{background:var(--ok);color:#fff}.toast .ic.err{background:var(--danger);color:#fff}
+.modal{backdrop-filter:blur(6px);animation:fadeIn .2s ease both}
+.modal .box{animation:popIn .35s var(--spring)}
+.modal.out{animation:fadeOut .18s ease forwards}
+@keyframes fadeOut{to{opacity:0}}
+.recent-item{animation:cardIn .4s var(--ease) both;transition:background .2s;border-radius:12px}
+.recent-item:hover{background:var(--surface2)}
+.tool-head .ti{animation:popIn .45s var(--spring) both}
+
+/* perspective-crop editor */
+.scan-edit{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:760px){.scan-edit{grid-template-columns:1fr 190px;align-items:start}}
+.modal .box{max-width:880px}
+.qstage{position:relative;user-select:none;touch-action:none;margin:14px;box-shadow:none;background:none}
+.qimg{display:block;width:100%;height:auto;border-radius:4px;box-shadow:0 2px 14px rgba(0,0,0,.25)}
+.qsvg{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.qshade{fill:rgba(12,10,20,.55)}
+.qline{fill:color-mix(in srgb,var(--brand) 8%,transparent);stroke:var(--brand);stroke-width:2.5;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.qgrid{stroke:rgba(255,255,255,.6);stroke-width:1;stroke-dasharray:4 4;vector-effect:non-scaling-stroke;opacity:0;transition:opacity .2s}
+.qstage.dragging .qgrid{opacity:1}
+.qh{position:absolute;touch-action:none;z-index:3}
+.qh.corner{width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:#fff;border:4px solid var(--brand);box-shadow:0 2px 10px rgba(0,0,0,.35);cursor:grab;transition:transform .2s var(--spring),background .2s}
+.qh.corner::after{content:"";position:absolute;inset:-14px;border-radius:50%}
+.qh.corner:hover,.qh.corner.drag{transform:scale(1.25)}
+.qh.corner.drag{cursor:grabbing;background:var(--brand)}
+.qh.edge{width:34px;height:12px;border-radius:8px;background:#fff;border:3px solid var(--brand);box-shadow:0 2px 8px rgba(0,0,0,.3);cursor:move}
+.qh.edge::after{content:"";position:absolute;inset:-14px -6px}
+.qh.edge.drag{background:var(--brand)}
+.qstage.snap .qh{transition:left .3s var(--ease),top .3s var(--ease),transform .2s}
+.loupe{position:absolute;width:120px;height:120px;border-radius:50%;overflow:hidden;border:3px solid #fff;box-shadow:0 8px 30px rgba(0,0,0,.45);transform:translate(-50%,-50%) scale(.6);opacity:0;pointer-events:none;transition:opacity .15s,transform .2s var(--spring);z-index:4}
+.loupe.on{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.loupe canvas{width:100%;height:100%;display:block}
+.prev{text-align:center}
+.prev-label{font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600}
+.prev canvas{max-width:100%;max-height:260px;box-shadow:0 4px 16px rgba(0,0,0,.2);border-radius:3px}
+@media(max-width:759px){.prev canvas{max-height:170px}}
+
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+.logo .by{font-style:normal;font-weight:600;font-size:13px;margin-left:2px;background:linear-gradient(90deg,#e5542e,#ff8a5c,#c86bff,#e5542e);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 6s linear infinite}
+footer .sig{background:linear-gradient(90deg,#e5542e,#c86bff);-webkit-background-clip:text;background-clip:text;color:transparent}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="logo" data-go="home"><span class="mark">PDF</span><span>PDF Kit <em class="by">by Nutchapon Claude AI</em><small>เครื่องมือ PDF ครบในที่เดียว</small></span></a>
+  <div class="spacer"></div>
+  <button class="iconbtn" id="themeBtn" title="สลับโหมดมืด/สว่าง"></button>
+</div></header>
+
+<main class="wrap" id="view"></main>
+
+<nav class="bottom" id="nav"></nav>
+<div class="busy" id="busy"><div class="box"><div class="spin"></div><div id="busyMsg">กำลังประมวลผล…</div><div class="bar"><i id="busyBar"></i></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ============ icons ============ */
+const I = {
+  scan:'<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M4 12h16"/>',
+  merge:'<path d="M8 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h2M16 4h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-2"/><path d="M9 12h6M12 9v6"/>',
+  organize:'<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
+  split:'<path d="M14 3h5a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-5M10 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/><path d="M12 2v20" stroke-dasharray="2 2.5"/>',
+  compress:'<path d="M8 3v5H3M16 3v5h5M8 21v-5H3M16 21v-5h5"/>',
+  pdf2img:'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.8"/><path d="m21 15-5-5L5 21"/>',
+  imgcompress:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9l6 6M15 9v6H9"/>',
+  img2pdf:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="m8 17 3-3 2 2 3-3"/>',
+  pagenum:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M10 15h1.5v3M10 18h3"/>',
+  watermark:'<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>',
+  crop:'<path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/>',
+  protect:'<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  sign:'<path d="M3 17c3-1 4-7 6-7s1 6 3 6 2-3 4-3 2 2 5 2"/><path d="M3 21h18"/>',
+  addcontent:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  home:'<path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/>',
+  tools:'<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  recent:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  prefs:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  back:'<path d="M15 18l-6-6 6-6"/>',
+  upload:'<path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>',
+  download:'<path d="M12 4v12M7 11l5 5 5-5"/><path d="M4 20h16"/>',
+  grip:'<circle cx="9" cy="6" r="1.3"/><circle cx="15" cy="6" r="1.3"/><circle cx="9" cy="12" r="1.3"/><circle cx="15" cy="12" r="1.3"/><circle cx="9" cy="18" r="1.3"/><circle cx="15" cy="18" r="1.3"/>',
+  x:'<path d="M6 6l12 12M18 6 6 18"/>',
+  rot:'<path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/>',
+  rotl:'<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>',
+  trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon:'<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  edit:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  left:'<path d="M15 18l-6-6 6-6"/>', right:'<path d="M9 18l6-6-6-6"/>',
+};
+const svg = (n, extra='') => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ${extra}>${I[n]||''}</svg>`;
+
+/* ============ tools registry ============ */
+const CATS = {
+  file:{name:'จัดการไฟล์ PDF', color:'var(--c-file)'},
+  conv:{name:'แปลงไฟล์', color:'var(--c-conv)'},
+  size:{name:'ลดขนาดไฟล์', color:'var(--c-size)'},
+  edit:{name:'แก้ไขเอกสาร', color:'var(--c-edit)'},
+  sec:{name:'ความปลอดภัย', color:'var(--c-sec)'},
+};
+const TOOLS = [
+  {id:'scan', cat:'conv', name:'สแกนเอกสาร', desc:'ถ่ายหรือเลือกรูปเอกสาร ครอบตัด ลบเงา แล้วรวมเป็น PDF'},
+  {id:'merge', cat:'file', name:'รวมไฟล์ PDF', desc:'รวมหลายไฟล์เป็นไฟล์เดียว เรียงลำดับได้ตามต้องการ'},
+  {id:'organize', cat:'file', name:'จัดหน้า PDF', desc:'ลากสลับลำดับหน้า หมุนหน้า และลบหน้าที่ไม่ต้องการ'},
+  {id:'split', cat:'file', name:'แยกไฟล์ PDF', desc:'ดึงหน้าที่เลือกออกมาเป็นไฟล์ใหม่ หรือแยกทีละหน้า'},
+  {id:'compress', cat:'size', name:'ลดขนาด PDF', desc:'บีบอัดเอกสารให้ไฟล์เล็กลง เหมาะกับการส่งอีเมลหรืออัปโหลด'},
+  {id:'pdf2img', cat:'conv', name:'PDF เป็นรูปภาพ', desc:'แปลงแต่ละหน้าเป็น JPG หรือ PNG พร้อมดูตัวอย่างก่อนดาวน์โหลด'},
+  {id:'imgcompress', cat:'size', name:'ลดขนาดไฟล์ภาพ', desc:'บีบอัด JPG, PNG, WEBP ปรับคุณภาพและย่อขนาดภาพได้'},
+  {id:'img2pdf', cat:'conv', name:'รูปภาพเป็น PDF', desc:'รวมรูปหลายรูปเป็น PDF ไฟล์เดียว เลือกขนาดหน้าและขอบได้'},
+  {id:'pagenum', cat:'edit', name:'ใส่เลขหน้า', desc:'เพิ่มเลขหน้าแบบเลขอารบิกหรือเลขไทย เลือกตำแหน่งและรูปแบบได้'},
+  {id:'watermark', cat:'edit', name:'ใส่ลายน้ำ', desc:'วางข้อความหรือรูปภาพจาง ๆ ทับทุกหน้า'},
+  {id:'crop', cat:'file', name:'ครอบตัดขอบ', desc:'ตัดขอบกระดาษที่ไม่ต้องการออกพร้อมกันทุกหน้า'},
+  {id:'protect', cat:'sec', name:'ใส่รหัสผ่าน', desc:'เข้ารหัส AES-256 ต้องใส่รหัสผ่านก่อนเปิดไฟล์'},
+  {id:'sign', cat:'edit', name:'เซ็นเอกสาร', desc:'วาด อัปโหลด หรือพิมพ์ลายเซ็น แล้ววางลงบนหน้าเอกสาร'},
+  {id:'addcontent', cat:'edit', name:'เพิ่มข้อมูลใน PDF', desc:'เพิ่มข้อความ เครื่องหมาย วันที่ หรือรูปภาพ ลากวางและปรับขนาดได้'},
+];
+const T = Object.fromEntries(TOOLS.map(t=>[t.id,t]));
+const toolIcon = (t, cls='ti') => `<div class="${cls}" style="background-color:${CATS[t.cat].color};--c:${CATS[t.cat].color}">${svg(t.id)}</div>`;
+
+/* ============ helpers ============ */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+function h(html){ const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstElementChild; }
+const esc = s => String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtSize = b => b<1024? b+' B' : b<1048576? (b/1024).toFixed(1)+' KB' : (b/1048576).toFixed(2)+' MB';
+const baseName = n => n.replace(/\.[^.]+$/,'');
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+const nextFrame = () => new Promise(r=>requestAnimationFrame(()=>r()));
+const store = {
+  get(k, d){ try{ const v=localStorage.getItem('pdfkit.'+k); return v==null? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem('pdfkit.'+k, JSON.stringify(v)); }catch(e){} }
+};
+let toastTimer;
+function toast(msg, ms=2600){ const t=$('#toast'); const ok=/^(ดาวน์โหลด|บันทึก|ล้าง|ลบลายเซ็น|วางลายเซ็น)/.test(msg), bad=!ok&&/ผิดพลาด|ไม่|กรุณา/.test(msg); t.innerHTML=(ok?'<span class="ic ok">✓</span>':bad?'<span class="ic err">!</span>':'')+'<span></span>'; t.lastChild.textContent=msg; t.classList.add('on'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('on'), ms); }
+const busy = {
+  show(msg='กำลังประมวลผล…'){ $('#busyMsg').textContent=msg; $('#busyBar').style.width='0'; $('#busyBar').parentElement.style.display='none'; $('#busy').classList.add('on'); },
+  progress(p, msg){ const b=$('#busyBar'); b.parentElement.style.display='block'; b.style.width=Math.round(p*100)+'%'; if(msg) $('#busyMsg').textContent=msg; },
+  hide(){ $('#busy').classList.remove('on'); }
+};
+async function run(msg, fn){
+  busy.show(msg); await nextFrame(); await sleep(20);
+  try{ return await fn(); }
+  catch(e){ console.error(e); toast(errText(e), 4500); }
+  finally{ busy.hide(); }
+}
+function errText(e){
+  const m = String(e && e.message || e);
+  if(/encrypt/i.test(m) || e?.name==='PasswordException') return 'ไฟล์นี้ถูกล็อกด้วยรหัสผ่าน กรุณาปลดล็อกก่อนใช้งาน';
+  if(/Invalid PDF|No PDF header|Failed to parse/i.test(m)) return 'ไฟล์ PDF เสียหายหรือไม่ใช่ไฟล์ PDF';
+  return 'เกิดข้อผิดพลาด: ' + m.slice(0,140);
+}
+const thaiDigits = s => String(s).replace(/[0-9]/g, d=>'๐๑๒๓๔๕๖๗๘๙'[d]);
+
+/* ---- downloads: works inside Claude artifacts (downloads capability) and on any normal web host ---- */
+async function saveFile(name, data, toolId){
+  const blob = data instanceof Blob ? data : new Blob([data], {type: name.endsWith('.pdf')?'application/pdf':'application/octet-stream'});
+  let done = false;
+  if (window.claude && typeof window.claude.use === 'function'){
+    let dl = null; try{ dl = await window.claude.use('downloads'); }catch(e){}
+    if (dl){
+      try{ await dl.save({filename:name, data:blob}); done = true; toast('บันทึกไฟล์แล้ว: '+name); }
+      catch(e){ if(e && e.code==='declined') return; if(e && e.code==='rate_limited'){ toast('กรุณารอสักครู่แล้วลองใหม่'); return; } }
+    }
+  }
+  if (!done){
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 8000);
+    toast('ดาวน์โหลด: '+name);
+  }
+  if (toolId) addRecent(toolId, name, blob.size);
+}
+async function saveZip(zipName, files, toolId){
+  const zip = new JSZip(); const used = new Set();
+  for (const f of files){ let n=f.name, k=1; while(used.has(n)){ n = baseName(f.name)+`-${k++}`+(f.name.match(/\.[^.]+$/)||[''])[0]; } used.add(n); zip.file(n, f.data); }
+  const blob = await zip.generateAsync({type:'blob'});
+  await saveFile(zipName, blob, toolId);
+}
+function addRecent(tool, name, size){
+  const r = store.get('recent', []); r.unshift({tool, name, size, t:Date.now()}); store.set('recent', r.slice(0,40));
+}
+
+/* ---- PDF engines ---- */
+const { PDFDocument, degrees, StandardFonts, rgb } = PDFLib;
+if (window.pdfjsLib) pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+async function readBytes(file){ return new Uint8Array(await file.arrayBuffer()); }
+async function openView(bytes){ return pdfjsLib.getDocument({data: bytes.slice(0), isEvalSupported:false}).promise; }
+async function openLib(bytes){
+  try { return await PDFDocument.load(bytes, {updateMetadata:false}); }
+  catch(e){ if(/encrypt/i.test(e.message)) throw new Error('encrypted'); throw e; }
+}
+async function renderPage(pdf, n, {width, scale, maxPx=6000}={}){
+  const page = await pdf.getPage(n);
+  const v1 = page.getViewport({scale:1});
+  let s = scale || (width? width/v1.width : 1);
+  if (v1.width*s > maxPx || v1.height*s > maxPx) s = Math.min(maxPx/v1.width, maxPx/v1.height);
+  const vp = page.getViewport({scale:s});
+  const c = document.createElement('canvas'); c.width = Math.max(1,Math.floor(vp.width)); c.height = Math.max(1,Math.floor(vp.height));
+  const ctx = c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height);
+  await page.render({canvasContext:ctx, viewport:vp}).promise;
+  page.cleanup();
+  return c;
+}
+const canvasBlob = (c, type='image/jpeg', q=0.9) => new Promise(r=>c.toBlob(r, type, q));
+async function blobBytes(b){ return new Uint8Array(await b.arrayBuffer()); }
+function loadImage(src){ return new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=()=>rej(new Error('เปิดไฟล์รูปภาพไม่ได้')); im.src=src; }); }
+async function fileToImage(file){ const url=URL.createObjectURL(file); try{ const im=await loadImage(url); return im; } finally { setTimeout(()=>URL.revokeObjectURL(url), 30000); } }
+function imageToCanvas(im, maxDim=0){
+  let w=im.naturalWidth||im.width, h=im.naturalHeight||im.height;
+  if (maxDim && Math.max(w,h)>maxDim){ const k=maxDim/Math.max(w,h); w=Math.round(w*k); h=Math.round(h*k); }
+  const c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(im,0,0,w,h); return c;
+}
+
+/* page geometry: display (rotated, top-left origin) fractions → PDF user space */
+function pageGeom(page){
+  const b = page.getCropBox(); const r = ((page.getRotation().angle % 360) + 360) % 360;
+  const W = (r===90||r===270)? b.height : b.width, H = (r===90||r===270)? b.width : b.height;
+  return {b, r, W, H};
+}
+function viewToPdf(g, fx, fy){
+  const {b, r, W, H} = g; const dx=fx*W, dy=fy*H;
+  if (r===90)  return {x:b.x+dy, y:b.y+dx};
+  if (r===180) return {x:b.x+b.width-dx, y:b.y+dy};
+  if (r===270) return {x:b.x+b.width-dy, y:b.y+b.height-dx};
+  return {x:b.x+dx, y:b.y+b.height-dy};
+}
+/* draw an embedded image at a display-space box (fractions of displayed page) */
+function drawBox(page, img, fx, fy, fw, fh, opts={}){
+  const g = pageGeom(page); const o = viewToPdf(g, fx, fy+fh);
+  page.drawImage(img, {x:o.x, y:o.y, width:fw*g.W, height:fh*g.H, rotate:degrees(g.r), opacity: opts.opacity ?? 1});
+}
+
+/* text → PNG (supports Thai through web fonts) */
+const FONTS = {
+  sarabun:{css:'Sarabun', label:'Sarabun (ไทย)'},
+  plex:{css:'IBM Plex Sans Thai', label:'IBM Plex Sans Thai'},
+  charm:{css:'Charmonman', label:'Charmonman (ลายมือไทย)'},
+  dancing:{css:'Dancing Script', label:'Dancing Script (ลายมืออังกฤษ)'},
+  serif:{css:'Georgia, "Times New Roman", serif', label:'Serif'},
+};
+async function ensureFont(css, weight=400){ try{ await document.fonts.load(`${weight} 40px ${css.includes(',')?css:'"'+css+'"'}`, 'กขabc123'); }catch(e){} }
+async function textToPng(text, {sizePt=14, color='#000000', font='sarabun', bold=false, angle=0, ratio=4, lineH=1.35}={}){
+  const f = FONTS[font] || FONTS.sarabun; const weight = bold?700:400; await ensureFont(f.css, weight);
+  const fam = f.css.includes(',')? f.css : `"${f.css}"`;
+  const px = sizePt*ratio; const lines = String(text).split('\n');
+  const m = document.createElement('canvas').getContext('2d'); m.font = `${weight} ${px}px ${fam}`;
+  const tw = Math.max(1, ...lines.map(l=>m.measureText(l).width)); const lh = px*lineH; const pad = px*0.18;
+  const bw = tw + pad*2, bh = lh*lines.length + pad*2;
+  const a = angle*Math.PI/180, cos=Math.abs(Math.cos(a)), sin=Math.abs(Math.sin(a));
+  const cw = Math.ceil(bw*cos + bh*sin), ch = Math.ceil(bw*sin + bh*cos);
+  const c = document.createElement('canvas'); c.width=cw; c.height=ch; const ctx=c.getContext('2d');
+  ctx.translate(cw/2, ch/2); ctx.rotate(-a); ctx.font = m.font; ctx.fillStyle=color; ctx.textBaseline='middle';
+  lines.forEach((l,i)=> ctx.fillText(l, -bw/2+pad, -bh/2+pad + lh*i + lh/2));
+  return {url:c.toDataURL('image/png'), wPt:cw/ratio, hPt:ch/ratio};
+}
+function symbolPng(kind, color='#000', sizePt=16){
+  const R=6, s=sizePt*R; const c=document.createElement('canvas'); c.width=c.height=s; const x=c.getContext('2d');
+  x.strokeStyle=x.fillStyle=color; x.lineWidth=s*0.11; x.lineCap='round'; x.lineJoin='round';
+  const box=()=>{ x.lineWidth=s*0.07; x.strokeRect(s*.1,s*.1,s*.8,s*.8); x.lineWidth=s*0.11; };
+  const check=(k=1)=>{ x.beginPath(); x.moveTo(s*.2,s*.52); x.lineTo(s*.42,s*.74); x.lineTo(s*.82,s*.26*k+(1-k)*s*.3); x.stroke(); };
+  const cross=()=>{ x.beginPath(); x.moveTo(s*.22,s*.22); x.lineTo(s*.78,s*.78); x.moveTo(s*.78,s*.22); x.lineTo(s*.22,s*.78); x.stroke(); };
+  if(kind==='check') check(); if(kind==='cross') cross();
+  if(kind==='boxcheck'){ box(); check(); } if(kind==='boxcross'){ box(); cross(); } if(kind==='box') box();
+  if(kind==='dot'){ x.beginPath(); x.arc(s/2,s/2,s*.22,0,7); x.fill(); }
+  if(kind==='circle'){ x.lineWidth=s*.08; x.beginPath(); x.arc(s/2,s/2,s*.4,0,7); x.stroke(); }
+  if(kind==='star'){ x.beginPath(); for(let i=0;i<10;i++){ const r=i%2? s*.2:s*.45, a=-Math.PI/2+i*Math.PI/5; x.lineTo(s/2+r*Math.cos(a), s/2+r*Math.sin(a)); } x.closePath(); x.fill(); }
+  return {url:c.toDataURL('image/png'), wPt:sizePt, hPt:sizePt};
+}
+function trimCanvas(c, pad=6){
+  const x=c.getContext('2d'); const {width:w,height:h}=c; const d=x.getImageData(0,0,w,h).data;
+  let t=h,l=w,r=-1,b=-1;
+  for(let y=0;y<h;y++) for(let i=0;i<w;i++){ if(d[(y*w+i)*4+3]>8){ if(i<l)l=i; if(i>r)r=i; if(y<t)t=y; if(y>b)b=y; } }
+  if(r<0) return null;
+  l=Math.max(0,l-pad); t=Math.max(0,t-pad); r=Math.min(w-1,r+pad); b=Math.min(h-1,b+pad);
+  const o=document.createElement('canvas'); o.width=r-l+1; o.height=b-t+1; o.getContext('2d').drawImage(c,l,t,o.width,o.height,0,0,o.width,o.height); return o;
+}
+async function dataUrlBytes(u){ return new Uint8Array(await (await fetch(u)).arrayBuffer()); }
+function dataUrlToBytes(u){ const b=atob(u.split(',')[1]); const a=new Uint8Array(b.length); for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i); return a; }
+
+function parseRanges(str, max){
+  const out=new Set(); String(str).split(/[,\s]+/).filter(Boolean).forEach(p=>{
+    const m=p.match(/^(\d+)?\s*-\s*(\d+)?$/); if(m){ let a=+(m[1]||1), b=+(m[2]||max); if(a>b)[a,b]=[b,a]; for(let i=Math.max(1,a);i<=Math.min(max,b);i++) out.add(i); }
+    else if(/^\d+$/.test(p)){ const n=+p; if(n>=1&&n<=max) out.add(n); }
+  }); return [...out].sort((a,b)=>a-b);
+}
+function toRanges(list){
+  const s=[...list].sort((a,b)=>a-b); const out=[]; let i=0;
+  while(i<s.length){ let j=i; while(j+1<s.length && s[j+1]===s[j]+1) j++; out.push(i===j? `${s[i]}` : `${s[i]}-${s[j]}`); i=j+1; } return out.join(', ');
+}
+
+/* ============ UI building blocks ============ */
+function toolPage(id){
+  const t = T[id];
+  const el = h(`<section><div class="tool-head"><button class="back" data-go="home" title="กลับ">${svg('back')}</button>${toolIcon(t)}<div><h2>${t.name}</h2><p>${t.desc}</p></div></div><div class="body"></div></section>`);
+  return {el, body: $('.body', el)};
+}
+function dropZone({accept, multiple=false, title, hint, onFiles, capture}){
+  const el = h(`<div class="drop" tabindex="0">${svg('upload')}<b>${title}</b><span>${hint||'ลากไฟล์มาวาง หรือคลิกเพื่อเลือกไฟล์'}</span><input type="file" hidden ${multiple?'multiple':''} accept="${accept}" ${capture?'capture="environment"':''}></div>`);
+  const inp = $('input', el);
+  el.onclick = () => inp.click();
+  el.onkeydown = e => { if(e.key==='Enter'||e.key===' '){ e.preventDefault(); inp.click(); } };
+  inp.onchange = () => { if(inp.files.length) onFiles([...inp.files]); inp.value=''; };
+  el.ondragover = e => { e.preventDefault(); el.classList.add('over'); };
+  el.ondragleave = () => el.classList.remove('over');
+  el.ondrop = e => { e.preventDefault(); el.classList.remove('over'); const fs=[...e.dataTransfer.files]; if(fs.length) onFiles(multiple?fs:[fs[0]]); };
+  return el;
+}
+function pickFiles(accept, multiple){ return new Promise(res=>{ const i=document.createElement('input'); i.type='file'; i.accept=accept; i.multiple=!!multiple; i.onchange=()=>res([...i.files]); i.click(); }); }
+function seg(options, value, onChange){
+  const el = h(`<div class="seg">${options.map(([v,l])=>`<button type="button" data-v="${v}" class="${v===value?'on':''}">${l}</button>`).join('')}</div>`);
+  el.value = value;
+  el.onclick = e => { const b=e.target.closest('button'); if(!b) return; $$('button',el).forEach(x=>x.classList.toggle('on',x===b)); el.value=b.dataset.v; onChange && onChange(el.value); };
+  return el;
+}
+const isPdf = f => /pdf$/i.test(f.type) || /\.pdf$/i.test(f.name);
+const isImg = f => /^image\//.test(f.type) || /\.(jpe?g|png|webp|gif|bmp|heic)$/i.test(f.name);
+
+/* single PDF loader shared by many tools */
+function singlePdfTool(id, onLoaded){
+  const {el, body} = toolPage(id);
+  const dz = dropZone({accept:'application/pdf,.pdf', title:'เลือกไฟล์ PDF', onFiles: async ([f]) => {
+    if(!isPdf(f)) return toast('กรุณาเลือกไฟล์ PDF');
+    await run('กำลังเปิดไฟล์…', async ()=>{
+      const bytes = await readBytes(f); const view = await openView(bytes);
+      body.innerHTML=''; const fileBar = h(`<div class="fileitem" style="margin-bottom:14px"><div class="th"></div><div class="meta"><b>${esc(f.name)}</b><span>${view.numPages} หน้า · ${fmtSize(f.size)}</span></div><button class="btn sm ghost">เปลี่ยนไฟล์</button></div>`);
+      renderPage(view,1,{width:44}).then(c=>$('.th',fileBar).appendChild(c)).catch(()=>{});
+      $('button',fileBar).onclick = () => { body.innerHTML=''; body.appendChild(dz); };
+      body.appendChild(fileBar);
+      await onLoaded({file:f, bytes, view, body, name:baseName(f.name)});
+    });
+  }});
+  body.appendChild(dz);
+  return el;
+}
+
+/* page thumbnail grid (lazy) */
+function renderThumbsInto(view, cells, width=220){
+  let cancelled=false;
+  (async()=>{ for(let k=0;k<100 && cells[0] && !cells[0].isConnected;k++) await sleep(30);
+    for(const [i,cell] of cells.entries()){ if(cancelled||!cell.isConnected) return; try{ const c=await renderPage(view, i+1, {width}); const slot=$('.cv',cell); slot.innerHTML=''; slot.appendChild(c); }catch(e){} } })();
+  return ()=>{cancelled=true;};
+}
+
+/* ============ Overlay editor (sign / add content) ============ */
+function OverlayEditor(view){
+  const st = {page:1, items:[], sel:null, W:0, H:0};
+  const el = h(`<div>
+    <div class="editor-bar"><div class="pager"><button class="btn sm" data-a="prev">${svg('left')}</button><span></span><button class="btn sm" data-a="next">${svg('right')}</button></div><div class="spacer"></div><span class="hint" style="font-size:12.5px;color:var(--muted)">ลากเพื่อย้าย · ลากจุดมุมเพื่อปรับขนาด</span></div>
+    <div class="stage-wrap"><div class="stage"></div></div></div>`);
+  const stage = $('.stage', el), pagerLbl = $('.pager span', el);
+  const renderCache = new Map();
+  async function show(){
+    pagerLbl.textContent = `หน้า ${st.page} / ${view.numPages}`;
+    const page = await view.getPage(st.page); const v = page.getViewport({scale:1}); st.W=v.width; st.H=v.height;
+    const maxW = Math.min(820, (el.parentElement?.clientWidth || 700) - 30);
+    const dispW = Math.max(260, Math.min(maxW, v.width*1.4));
+    stage.style.width = dispW+'px';
+    let c = renderCache.get(st.page);
+    if(!c){ c = await renderPage(view, st.page, {width: dispW*Math.min(2, window.devicePixelRatio||1)}); renderCache.set(st.page, c); }
+    stage.innerHTML=''; stage.appendChild(c); drawItems();
+  }
+  function drawItems(){
+    $$('.ov', stage).forEach(n=>n.remove());
+    st.items.filter(it=>it.page===st.page).forEach(it=>{
+      const n = h(`<div class="ov ${st.sel===it?'sel':''}"><img src="${it.url}" draggable="false"><span class="rz"></span><button class="del" title="ลบ">✕</button></div>`);
+      Object.assign(n.style,{left:it.fx*100+'%', top:it.fy*100+'%', width:it.fw*100+'%', height:it.fh*100+'%'});
+      n.onpointerdown = e => startDrag(e, it, n, e.target.classList.contains('rz')?'resize':'move');
+      $('.del',n).onpointerdown = e => e.stopPropagation();
+      $('.del',n).onclick = e => { e.stopPropagation(); st.items = st.items.filter(x=>x!==it); st.sel=null; drawItems(); };
+      stage.appendChild(n);
+    });
+  }
+  function startDrag(e, it, n, mode){
+    if(e.target.classList.contains('del')) return;
+    e.preventDefault(); e.stopPropagation(); st.sel = it; $$('.ov',stage).forEach(x=>x.classList.toggle('sel', x===n));
+    const r = stage.getBoundingClientRect(); const sx=e.clientX, sy=e.clientY; const o={...it}; const aspect = (it.fw*r.width)/(it.fh*r.height);
+    n.setPointerCapture(e.pointerId);
+    n.onpointermove = ev => {
+      const dx=(ev.clientX-sx)/r.width, dy=(ev.clientY-sy)/r.height;
+      if(mode==='move'){ it.fx = Math.min(1-it.fw*0.2, Math.max(-it.fw*0.8, o.fx+dx)); it.fy = Math.min(1-it.fh*0.2, Math.max(-it.fh*0.8, o.fy+dy)); }
+      else { let nw = Math.max(0.02, o.fw+dx); let nh = (nw*r.width/aspect)/r.height; it.fw=nw; it.fh=nh; }
+      Object.assign(n.style,{left:it.fx*100+'%', top:it.fy*100+'%', width:it.fw*100+'%', height:it.fh*100+'%'});
+    };
+    n.onpointerup = n.onpointercancel = () => { n.onpointermove=null; };
+  }
+  stage.addEventListener('pointerdown', e => { if(e.target===stage || e.target.tagName==='CANVAS'){ st.sel=null; $$('.ov',stage).forEach(x=>x.classList.remove('sel')); } });
+  $('[data-a=prev]',el).onclick = () => { if(st.page>1){ st.page--; st.sel=null; show(); } };
+  $('[data-a=next]',el).onclick = () => { if(st.page<view.numPages){ st.page++; st.sel=null; show(); } };
+  return {
+    el, show, st,
+    add({url, wPt, hPt, maxW=0.5}){
+      let fw = wPt/st.W, fh = hPt/st.H; if(fw>maxW){ const k=maxW/fw; fw*=k; fh*=k; }
+      const n = st.items.filter(x=>x.page===st.page).length;
+      const fy = Math.min(1-fh, 0.15 + (n%9)*0.085), fx = Math.min(1-fw, Math.max(0, 0.5-fw/2 + ((n%3)-1)*0.04));
+      const it = {page:st.page, url, fx, fy, fw, fh}; st.items.push(it); st.sel=it; drawItems(); return it;
+    },
+    async apply(lib){
+      const cache = new Map();
+      for(const it of st.items){
+        let img = cache.get(it.url); if(!img){ img = await lib.embedPng(dataUrlToBytes(it.url)); cache.set(it.url, img); }
+        drawBox(lib.getPage(it.page-1), img, it.fx, it.fy, it.fw, it.fh);
+      }
+    }
+  };
+}
+
+/* ============ TOOLS ============ */
+const VIEWS = {};
+
+/* ---- MERGE ---- */
+VIEWS.merge = () => {
+  const {el, body} = toolPage('merge');
+  const files = [];
+  const list = h(`<div class="filelist"></div>`);
+  const actions = h(`<div class="actions"><button class="btn" data-a="add">${svg('plus')} เพิ่มไฟล์</button><div class="spacer"></div><button class="btn primary" data-a="go">${svg('merge')} รวมไฟล์ PDF</button></div>`);
+  const wrap = h(`<div class="card" style="display:none"><div class="note" style="margin-bottom:12px">ลาก ${svg('grip','style="width:14px;height:14px;vertical-align:-2px"')} เพื่อเรียงลำดับไฟล์ ไฟล์ด้านบนจะอยู่หน้าแรก</div></div>`);
+  wrap.append(list, actions);
+  async function add(fs){
+    fs = fs.filter(isPdf); if(!fs.length) return toast('กรุณาเลือกไฟล์ PDF');
+    await run('กำลังอ่านไฟล์…', async ()=>{
+      for(const f of fs){
+        const bytes = await readBytes(f); let view; try{ view = await openView(bytes); }catch(e){ toast(`${f.name}: ${errText(e)}`); continue; }
+        const item = {id:Math.random().toString(36).slice(2), f, bytes, n:view.numPages};
+        files.push(item);
+        const row = h(`<div class="fileitem" data-id="${item.id}"><span class="handle">${svg('grip')}</span><div class="th"></div><div class="meta"><b>${esc(f.name)}</b><span>${item.n} หน้า · ${fmtSize(f.size)}</span></div><button class="x" title="นำออก">${svg('x')}</button></div>`);
+        renderPage(view,1,{width:60}).then(c=>$('.th',row).appendChild(c)).catch(()=>{});
+        $('.x',row).onclick = () => { files.splice(files.indexOf(item),1); row.remove(); refresh(); };
+        list.appendChild(row);
+      }
+      refresh();
+    });
+  }
+  function refresh(){ wrap.style.display = files.length? '' : 'none'; $('[data-a=go]',actions).disabled = files.length<2; }
+  Sortable.create(list, {handle:'.handle', animation:150});
+  $('[data-a=add]',actions).onclick = async () => add(await pickFiles('application/pdf,.pdf', true));
+  $('[data-a=go]',actions).onclick = () => run('กำลังรวมไฟล์…', async ()=>{
+    const order = $$('.fileitem', list).map(r=>files.find(x=>x.id===r.dataset.id));
+    const out = await PDFDocument.create();
+    for(const [i,it] of order.entries()){
+      busy.progress(i/order.length, `กำลังรวม ${i+1}/${order.length}`);
+      const src = await openLib(it.bytes); const pages = await out.copyPages(src, src.getPageIndices()); pages.forEach(p=>out.addPage(p));
+    }
+    const bytes = await out.save();
+    await saveFile('merged.pdf', bytes, 'merge');
+  });
+  body.append(dropZone({accept:'application/pdf,.pdf', multiple:true, title:'เลือกไฟล์ PDF หลายไฟล์', onFiles:add}), h('<div style="height:14px"></div>'), wrap);
+  return el;
+};
+
+/* ---- ORGANIZE ---- */
+VIEWS.organize = () => singlePdfTool('organize', async ({bytes, view, body, name}) => {
+  const grid = h(`<div class="pages"></div>`);
+  const pages = [];
+  for(let i=0;i<view.numPages;i++){
+    const p = {src:i, rot:0, id:'p'+i}; pages.push(p);
+    const cell = h(`<div class="pg" data-id="${p.id}"><div class="tools"><button title="หมุน" data-a="rot">${svg('rot')}</button><button title="ลบ" data-a="del">${svg('trash')}</button></div><div class="cv"></div><div class="num">หน้า ${i+1}</div></div>`);
+    $('[data-a=rot]',cell).onclick = () => { p.rot=(p.rot+90)%360; const c=$('canvas',cell); if(c) c.style.transform=`rotate(${p.rot}deg) scale(${p.rot%180? .75:1})`; };
+    $('[data-a=del]',cell).onclick = () => { p.deleted=true; cell.remove(); count(); };
+    grid.appendChild(cell);
+  }
+  renderThumbsInto(view, $$('.pg',grid), 200);
+  Sortable.create(grid, {animation:150, filter:'.tools button', preventOnFilter:false, delay:120, delayOnTouchOnly:true});
+  const info = h(`<div class="note" style="margin-bottom:12px">ลากการ์ดเพื่อสลับลำดับหน้า · ${svg('rot','style="width:14px;height:14px;vertical-align:-2px"')} หมุน 90° · ${svg('trash','style="width:14px;height:14px;vertical-align:-2px"')} ลบหน้า</div>`);
+  const act = h(`<div class="actions"><span class="cnt" style="color:var(--muted);align-self:center"></span><div class="spacer"></div><button class="btn primary">${svg('download')} บันทึก PDF</button></div>`);
+  const count = () => { const n=$$('.pg',grid).length; $('.cnt',act).textContent = `เหลือ ${n} หน้า`; $('button',act).disabled = n===0; };
+  count();
+  $('button',act).onclick = () => run('กำลังสร้างไฟล์…', async ()=>{
+    const order = $$('.pg',grid).map(c=>pages.find(p=>p.id===c.dataset.id));
+    const src = await openLib(bytes); const out = await PDFDocument.create();
+    const copied = await out.copyPages(src, order.map(p=>p.src));
+    copied.forEach((pg,i)=>{ const r=(pg.getRotation().angle + order[i].rot)%360; pg.setRotation(degrees(r)); out.addPage(pg); });
+    await saveFile(name+'-organized.pdf', await out.save(), 'organize');
+  });
+  const card = h(`<div class="card"></div>`); card.append(info, grid, act); body.appendChild(card);
+});
+
+/* ---- SPLIT ---- */
+VIEWS.split = () => singlePdfTool('split', async ({bytes, view, body, name}) => {
+  const N = view.numPages; const sel = new Set();
+  const card = h(`<div class="card">
+    <div class="fields" style="margin-bottom:12px"><div class="field" style="flex:3"><label>หน้าที่ต้องการ (เช่น 1-3, 5, 8-10) หรือคลิกเลือกจากภาพด้านล่าง</label><input type="text" class="rng" placeholder="เช่น 1-3, 5"></div>
+    <div class="field" style="flex:1;justify-content:flex-end"><div class="row"><button class="btn sm" data-a="all">เลือกทั้งหมด</button><button class="btn sm" data-a="none">ล้าง</button></div></div></div>
+    <div class="pages"></div>
+    <div class="actions" style="align-items:center">
+      <button class="btn primary" data-a="one">${svg('download')} รวมหน้าที่เลือกเป็นไฟล์เดียว</button>
+      <button class="btn" data-a="each">แยกหน้าที่เลือกไฟล์ละหน้า (ZIP)</button>
+      <div class="row"><button class="btn" data-a="every">แบ่งทุก ๆ</button><input type="number" min="1" value="2" class="evn" style="width:64px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface2);padding:0 10px"><span>หน้า (ZIP)</span></div>
+    </div></div>`);
+  const grid = $('.pages',card), rng = $('.rng',card);
+  const sync = () => { $$('.pg',grid).forEach((c,i)=>c.classList.toggle('sel', sel.has(i+1))); rng.value = toRanges(sel); $('[data-a=one]',card).disabled = $('[data-a=each]',card).disabled = !sel.size; };
+  for(let i=1;i<=N;i++){ const c=h(`<div class="pg selectable"><div class="cv"></div><div class="num">หน้า ${i}</div></div>`); c.onclick=()=>{ sel.has(i)?sel.delete(i):sel.add(i); sync(); }; grid.appendChild(c); }
+  renderThumbsInto(view, $$('.pg',grid), 200);
+  rng.oninput = () => { sel.clear(); parseRanges(rng.value, N).forEach(n=>sel.add(n)); $$('.pg',grid).forEach((c,i)=>c.classList.toggle('sel', sel.has(i+1))); $('[data-a=one]',card).disabled = $('[data-a=each]',card).disabled = !sel.size; };
+  $('[data-a=all]',card).onclick = () => { for(let i=1;i<=N;i++) sel.add(i); sync(); };
+  $('[data-a=none]',card).onclick = () => { sel.clear(); sync(); };
+  async function extract(src, idxs){ const out=await PDFDocument.create(); (await out.copyPages(src, idxs.map(i=>i-1))).forEach(p=>out.addPage(p)); return out.save(); }
+  $('[data-a=one]',card).onclick = () => run('กำลังแยกไฟล์…', async ()=>{ const src=await openLib(bytes); const list=[...sel].sort((a,b)=>a-b); await saveFile(`${name}-หน้า-${toRanges(list).replace(/\s/g,'')}.pdf`, await extract(src,list), 'split'); });
+  $('[data-a=each]',card).onclick = () => run('กำลังแยกไฟล์…', async ()=>{ const src=await openLib(bytes); const list=[...sel].sort((a,b)=>a-b); const files=[];
+    for(const [k,i] of list.entries()){ busy.progress(k/list.length); files.push({name:`${name}-หน้า-${i}.pdf`, data: await extract(src,[i])}); }
+    await saveZip(name+'-split.zip', files, 'split'); });
+  $('[data-a=every]',card).onclick = () => run('กำลังแยกไฟล์…', async ()=>{ const n=Math.max(1, +$('.evn',card).value||1); const src=await openLib(bytes); const files=[];
+    for(let s=1;s<=N;s+=n){ busy.progress(s/N); const idx=[]; for(let i=s;i<Math.min(N+1,s+n);i++) idx.push(i); files.push({name:`${name}-${s}-${idx[idx.length-1]}.pdf`, data: await extract(src, idx)}); }
+    await saveZip(name+'-split.zip', files, 'split'); });
+  sync(); body.appendChild(card);
+});
+
+/* ---- COMPRESS ---- */
+VIEWS.compress = () => singlePdfTool('compress', async ({file, bytes, view, body, name}) => {
+  let level = 'med';
+  const LV = {low:{dpi:150, q:0.78, label:'คุณภาพสูง'}, med:{dpi:110, q:0.62, label:'แนะนำ'}, high:{dpi:80, q:0.45, label:'ไฟล์เล็กที่สุด'}};
+  const card = h(`<div class="card"><div class="field" style="margin-bottom:12px"><label>ระดับการบีบอัด</label></div>
+    <div class="note" style="margin-bottom:12px">ระบบจะแปลงแต่ละหน้าเป็นภาพที่บีบอัดแล้ว ทำให้ไฟล์เล็กลงมาก (ข้อความในไฟล์ผลลัพธ์จะคัดลอก/ค้นหาไม่ได้) หากต้องการคงข้อความไว้ ให้เลือก “ปรับโครงสร้างไฟล์”</div>
+    <div class="actions"><button class="btn primary" data-a="go">${svg('compress')} ลดขนาดไฟล์</button></div><div class="out" style="margin-top:14px"></div></div>`);
+  const sg = seg([['low','คุณภาพสูง'],['med','แนะนำ'],['high','เล็กที่สุด'],['lossless','ปรับโครงสร้างไฟล์ (คงข้อความ)']], level, v=>level=v);
+  $('.field',card).appendChild(sg);
+  $('[data-a=go]',card).onclick = () => run('กำลังบีบอัด…', async ()=>{
+    let out;
+    if(level==='lossless'){ const lib=await openLib(bytes); out = await lib.save({useObjectStreams:true}); }
+    else {
+      const {dpi,q} = LV[level]; const doc = await PDFDocument.create();
+      for(let i=1;i<=view.numPages;i++){
+        busy.progress((i-1)/view.numPages, `กำลังบีบอัดหน้า ${i}/${view.numPages}`);
+        const page = await view.getPage(i); const v = page.getViewport({scale:1});
+        const c = await renderPage(view, i, {scale:dpi/72, maxPx:4000});
+        const jpg = await doc.embedJpg(await blobBytes(await canvasBlob(c,'image/jpeg',q)));
+        const p = doc.addPage([v.width, v.height]); p.drawImage(jpg,{x:0,y:0,width:v.width,height:v.height});
+        c.width=c.height=0;
+      }
+      out = await doc.save();
+    }
+    const pct = (1-out.length/file.size)*100;
+    const res = $('.out',card); res.innerHTML='';
+    const box = h(`<div class="note"><div class="stat"><span>เดิม <b>${fmtSize(file.size)}</b></span><span>→ ใหม่ <b>${fmtSize(out.length)}</b></span><span class="${pct>0?'down':''}">${pct>0? 'เล็กลง '+pct.toFixed(0)+'%' : 'ไม่เล็กลง (ไฟล์นี้ถูกบีบอัดมาดีแล้ว)'}</span></div><div class="actions"><button class="btn primary">${svg('download')} ดาวน์โหลด</button></div></div>`);
+    $('button',box).onclick = () => saveFile(name+'-compressed.pdf', out, 'compress');
+    res.appendChild(box);
+  });
+  body.appendChild(card);
+});
+
+/* ---- PDF → IMAGE ---- */
+VIEWS.pdf2img = () => singlePdfTool('pdf2img', async ({view, body, name}) => {
+  const N=view.numPages; let fmt='jpg';
+  const card = h(`<div class="card"><div class="fields">
+    <div class="field"><label>รูปแบบไฟล์</label></div>
+    <div class="field"><label>ความละเอียด</label><select class="dpi"><option value="96">ปกติ (96 dpi)</option><option value="150" selected>ชัด (150 dpi)</option><option value="200">ชัดมาก (200 dpi)</option><option value="300">พิมพ์ (300 dpi)</option></select></div>
+    <div class="field"><label>หน้า (เว้นว่าง = ทุกหน้า)</label><input type="text" class="rng" placeholder="เช่น 1-5"></div></div>
+    <div class="actions"><button class="btn primary" data-a="go">${svg('pdf2img')} แปลงเป็นรูปภาพ</button></div></div>`);
+  $('.field',card).appendChild(seg([['jpg','JPG'],['png','PNG']], fmt, v=>fmt=v));
+  const resCard = h(`<div class="card" style="display:none"><div class="row" style="margin-bottom:12px"><b class="cnt"></b><div class="spacer"></div><button class="btn primary" data-a="zip">${svg('download')} ดาวน์โหลดทั้งหมด (ZIP)</button></div><div class="results"></div></div>`);
+  let outs=[];
+  $('[data-a=go]',card).onclick = () => run('กำลังแปลง…', async ()=>{
+    const list = $('.rng',card).value.trim()? parseRanges($('.rng',card).value, N) : [...Array(N)].map((_,i)=>i+1);
+    if(!list.length) throw new Error('ช่วงหน้าไม่ถูกต้อง');
+    const dpi=+$('.dpi',card).value; outs=[]; const grid=$('.results',resCard); grid.innerHTML='';
+    for(const [k,i] of list.entries()){
+      busy.progress(k/list.length, `กำลังแปลงหน้า ${i} (${k+1}/${list.length})`);
+      const c = await renderPage(view, i, {scale:dpi/72});
+      const blob = await canvasBlob(c, fmt==='png'?'image/png':'image/jpeg', 0.9);
+      const fname = `${name}-${String(i).padStart(String(N).length,'0')}.${fmt}`; outs.push({name:fname, data:blob});
+      const r = h(`<div class="res"><img src="${URL.createObjectURL(blob)}"><span>หน้า ${i} · ${fmtSize(blob.size)}</span><button class="btn sm">${svg('download')} บันทึก</button></div>`);
+      $('button',r).onclick = () => saveFile(fname, blob, 'pdf2img'); grid.appendChild(r); c.width=c.height=0;
+    }
+    $('.cnt',resCard).textContent = `${outs.length} รูป`; resCard.style.display='';
+    resCard.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+  $('[data-a=zip]',resCard).onclick = () => run('กำลังสร้าง ZIP…', ()=> saveZip(name+'-images.zip', outs, 'pdf2img'));
+  body.append(card, resCard);
+});
+
+/* ---- IMAGE COMPRESS ---- */
+VIEWS.imgcompress = () => {
+  const {el, body} = toolPage('imgcompress');
+  let files=[], fmt='keep';
+  const card = h(`<div class="card" style="display:none"><div class="fields">
+      <div class="field"><label>คุณภาพ: <span class="qv">75</span>%</label><input type="range" class="q" min="20" max="95" value="75"></div>
+      <div class="field"><label>ย่อด้านที่ยาวที่สุดไม่เกิน</label><select class="mx"><option value="0">ไม่ย่อ</option><option value="3840">3840 px (4K)</option><option value="2560">2560 px</option><option value="1920" selected>1920 px (Full HD)</option><option value="1280">1280 px</option><option value="800">800 px</option></select></div>
+      <div class="field fmt"><label>รูปแบบผลลัพธ์</label></div></div>
+      <div class="actions"><button class="btn" data-a="add">${svg('plus')} เพิ่มรูป</button><div class="spacer"></div><button class="btn primary" data-a="go">${svg('imgcompress')} บีบอัดรูปภาพ</button></div></div>`);
+  $('.fmt',card).appendChild(seg([['keep','เหมือนเดิม'],['jpeg','JPG'],['webp','WEBP']], fmt, v=>fmt=v));
+  $('.q',card).oninput = e => $('.qv',card).textContent = e.target.value;
+  const resCard = h(`<div class="card" style="display:none"><div class="row" style="margin-bottom:12px"><div class="sum"></div><div class="spacer"></div><button class="btn primary" data-a="zip">${svg('download')} ดาวน์โหลดทั้งหมด (ZIP)</button></div><div class="results"></div></div>`);
+  const list = h(`<div class="results" style="margin-bottom:12px"></div>`); card.prepend(list);
+  let outs=[];
+  function add(fs){ fs=fs.filter(isImg); if(!fs.length) return toast('กรุณาเลือกไฟล์รูปภาพ'); files.push(...fs); drawList(); }
+  function drawList(){ list.innerHTML=''; files.forEach((f,i)=>{ const r=h(`<div class="res"><img src="${URL.createObjectURL(f)}"><span>${esc(f.name.slice(0,24))}<br>${fmtSize(f.size)}</span><button class="btn sm ghost">นำออก</button></div>`); $('button',r).onclick=()=>{files.splice(i,1); drawList();}; list.appendChild(r); }); card.style.display = files.length?'':'none'; }
+  $('[data-a=add]',card).onclick = async()=> add(await pickFiles('image/*', true));
+  $('[data-a=go]',card).onclick = () => run('กำลังบีบอัด…', async ()=>{
+    const q=+$('.q',card).value/100, mx=+$('.mx',card).value; outs=[]; const grid=$('.results',resCard); grid.innerHTML=''; let a=0,b=0;
+    for(const [k,f] of files.entries()){
+      busy.progress(k/files.length);
+      const im = await fileToImage(f); const c = imageToCanvas(im, mx);
+      let type = fmt==='keep'? (/png/.test(f.type)?'image/png': /webp/.test(f.type)?'image/webp':'image/jpeg') : 'image/'+fmt;
+      let blob = await canvasBlob(c, type, q);
+      if(type==='image/png' && blob.size>=f.size && !mx){ blob=f; }
+      if(fmt==='keep' && blob.size>f.size && type!=='image/png'){ blob=f; }
+      const ext = type==='image/png'?'png': type==='image/webp'?'webp':'jpg';
+      const fname = baseName(f.name)+'-min.'+ext; outs.push({name:fname, data:blob}); a+=f.size; b+=blob.size;
+      const pct=(1-blob.size/f.size)*100;
+      const r=h(`<div class="res"><img src="${URL.createObjectURL(blob)}"><span>${fmtSize(f.size)} → <b>${fmtSize(blob.size)}</b> <span class="down" style="display:inline">${pct>0?'-'+pct.toFixed(0)+'%':''}</span><br>${c.width}×${c.height}</span><button class="btn sm">${svg('download')} บันทึก</button></div>`);
+      $('button',r).onclick=()=>saveFile(fname, blob, 'imgcompress'); grid.appendChild(r);
+    }
+    $('.sum',resCard).innerHTML = `<div class="stat"><span>รวม <b>${fmtSize(a)}</b> → <b>${fmtSize(b)}</b></span><span class="down">${a>b?'เล็กลง '+((1-b/a)*100).toFixed(0)+'%':''}</span></div>`;
+    resCard.style.display=''; resCard.scrollIntoView({behavior:'smooth'});
+  });
+  $('[data-a=zip]',resCard).onclick = () => run('กำลังสร้าง ZIP…', ()=>saveZip('compressed-images.zip', outs, 'imgcompress'));
+  body.append(dropZone({accept:'image/*', multiple:true, title:'เลือกรูปภาพ (JPG, PNG, WEBP)', hint:'ประมวลผลในเบราว์เซอร์ ไม่มีการอัปโหลดไฟล์', onFiles:add}), h('<div style="height:14px"></div>'), card, resCard);
+  return el;
+};
+
+/* ---- IMAGES → PDF (also used by Scan) ---- */
+const PAGE_SIZES = {a4:[595.28,841.89], letter:[612,792], a5:[419.53,595.28]};
+async function imagesToPdf(canvases, {size='a4', orient='auto', margin=0}={}){
+  const doc = await PDFDocument.create();
+  for(const [k,c] of canvases.entries()){
+    busy.progress(k/canvases.length, `กำลังสร้างหน้า ${k+1}/${canvases.length}`);
+    const img = c.__png ? await doc.embedPng(await blobBytes(await canvasBlob(c,'image/png'))) : await doc.embedJpg(await blobBytes(await canvasBlob(c,'image/jpeg',0.9)));
+    let pw, ph;
+    if(size==='fit'){ const k2 = 72/150; pw = c.width*k2 + margin*2; ph = c.height*k2 + margin*2; }
+    else { [pw,ph] = PAGE_SIZES[size]; const land = orient==='landscape' || (orient==='auto' && c.width>c.height); if(land) [pw,ph]=[ph,pw]; }
+    const p = doc.addPage([pw,ph]); const aw=pw-margin*2, ah=ph-margin*2; const s=Math.min(aw/c.width, ah/c.height);
+    const w=c.width*s, hh=c.height*s; p.drawImage(img,{x:(pw-w)/2, y:(ph-hh)/2, width:w, height:hh});
+  }
+  return doc.save();
+}
+VIEWS.img2pdf = () => {
+  const {el, body} = toolPage('img2pdf');
+  const items=[]; let size='a4', orient='auto', margin='0';
+  const card = h(`<div class="card" style="display:none"><div class="note" style="margin-bottom:12px">ลากรูปเพื่อเรียงลำดับหน้า</div><div class="pages list"></div>
+    <div class="fields" style="margin-top:14px"><div class="field f1"><label>ขนาดหน้า</label></div><div class="field f2"><label>แนวกระดาษ</label></div><div class="field f3"><label>ขอบกระดาษ</label></div></div>
+    <div class="actions"><button class="btn" data-a="add">${svg('plus')} เพิ่มรูป</button><div class="spacer"></div><button class="btn primary" data-a="go">${svg('img2pdf')} สร้าง PDF</button></div></div>`);
+  $('.f1',card).appendChild(seg([['a4','A4'],['letter','Letter'],['fit','ตามขนาดรูป']], size, v=>size=v));
+  $('.f2',card).appendChild(seg([['auto','อัตโนมัติ'],['portrait','แนวตั้ง'],['landscape','แนวนอน']], orient, v=>orient=v));
+  $('.f3',card).appendChild(seg([['0','ไม่มี'],['18','เล็ก'],['40','ใหญ่']], margin, v=>margin=v));
+  const list=$('.list',card);
+  Sortable.create(list,{animation:150, filter:'.tools button', preventOnFilter:false, delay:120, delayOnTouchOnly:true});
+  async function add(fs){ fs=fs.filter(isImg); if(!fs.length) return toast('กรุณาเลือกไฟล์รูปภาพ');
+    for(const f of fs){ const it={id:Math.random().toString(36).slice(2), f}; items.push(it);
+      const c=h(`<div class="pg" data-id="${it.id}"><div class="tools"><button data-a="del" title="ลบ">${svg('trash')}</button></div><div class="cv"><img src="${URL.createObjectURL(f)}" style="max-width:100%;max-height:150px;box-shadow:0 1px 4px rgba(0,0,0,.18)"></div><div class="num">${esc(f.name.slice(0,18))}</div></div>`);
+      $('[data-a=del]',c).onclick=()=>{ items.splice(items.indexOf(it),1); c.remove(); card.style.display=items.length?'':'none'; };
+      list.appendChild(c); }
+    card.style.display='';
+  }
+  $('[data-a=add]',card).onclick = async()=>add(await pickFiles('image/*',true));
+  $('[data-a=go]',card).onclick = () => run('กำลังสร้าง PDF…', async ()=>{
+    const order=$$('.pg',list).map(c=>items.find(i=>i.id===c.dataset.id)); const cs=[];
+    for(const it of order){ const im=await fileToImage(it.f); const c=imageToCanvas(im, 3000); if(/png/i.test(it.f.type)) c.__png=true; cs.push(c); }
+    await saveFile('images.pdf', await imagesToPdf(cs,{size, orient, margin:+margin}), 'img2pdf');
+  });
+  body.append(dropZone({accept:'image/*', multiple:true, title:'เลือกรูปภาพ', hint:'JPG, PNG, WEBP · เลือกได้หลายรูป', onFiles:add}), h('<div style="height:14px"></div>'), card);
+  return el;
+};
+
+/* ---- PAGE NUMBERS ---- */
+VIEWS.pagenum = () => singlePdfTool('pagenum', async ({bytes, view, body, name}) => {
+  let pos='bc', digits='arabic';
+  const card = h(`<div class="card"><div class="fields">
+    <div class="field fpos"><label>ตำแหน่ง</label></div>
+    <div class="field fdig"><label>ตัวเลข</label></div></div>
+    <div class="fields" style="margin-top:12px">
+    <div class="field"><label>รูปแบบ</label><select class="fmt"><option value="{n}">1</option><option value="หน้า {n}">หน้า 1</option><option value="{n}/{t}">1/10</option><option value="หน้า {n} จาก {t}">หน้า 1 จาก 10</option><option value="- {n} -">- 1 -</option><option value="Page {n} of {t}">Page 1 of 10</option></select></div>
+    <div class="field"><label>เริ่มนับที่เลข</label><input type="number" class="start" value="1"></div>
+    <div class="field"><label>ใส่ตั้งแต่หน้าที่</label><input type="number" class="from" value="1" min="1" max="${view.numPages}"></div>
+    <div class="field"><label>ขนาดตัวอักษร (pt)</label><input type="number" class="size" value="11" min="6" max="48"></div>
+    <div class="field"><label>สี</label><input type="color" class="color" value="#333333"></div>
+    <div class="field"><label>ระยะจากขอบ (pt)</label><input type="number" class="mg" value="28" min="0" max="200"></div></div>
+    <div class="actions"><button class="btn primary">${svg('pagenum')} ใส่เลขหน้า</button></div></div>`);
+  $('.fpos',card).appendChild(seg([['tl','บนซ้าย'],['tc','บนกลาง'],['tr','บนขวา'],['bl','ล่างซ้าย'],['bc','ล่างกลาง'],['br','ล่างขวา']], pos, v=>pos=v));
+  $('.fdig',card).appendChild(seg([['arabic','1 2 3'],['thai','๑ ๒ ๓']], digits, v=>digits=v));
+  $('button.primary',card).onclick = () => run('กำลังใส่เลขหน้า…', async ()=>{
+    const lib = await openLib(bytes); const pages = lib.getPages(); const total = pages.length;
+    const fmt=$('.fmt',card).value, start=+$('.start',card).value||1, from=Math.max(1,+$('.from',card).value||1), size=+$('.size',card).value||11, color=$('.color',card).value, mg=+$('.mg',card).value;
+    const shown = total-from+1;
+    for(let i=from-1;i<total;i++){
+      busy.progress(i/total);
+      let txt = fmt.replace('{n}', start+(i-from+1)).replace('{t}', start+shown-1); if(digits==='thai') txt=thaiDigits(txt);
+      const t = await textToPng(txt, {sizePt:size, color});
+      const img = await lib.embedPng(dataUrlToBytes(t.url)); const page=pages[i]; const g=pageGeom(page);
+      const fw=t.wPt/g.W, fh=t.hPt/g.H, mx=mg/g.W, my=mg/g.H;
+      const fx = pos[1]==='l'? mx : pos[1]==='r'? 1-mx-fw : 0.5-fw/2;
+      const fy = pos[0]==='t'? my : 1-my-fh;
+      drawBox(page, img, fx, fy, fw, fh);
+    }
+    await saveFile(name+'-numbered.pdf', await lib.save(), 'pagenum');
+  });
+  body.appendChild(card);
+});
+
+/* ---- WATERMARK ---- */
+VIEWS.watermark = () => singlePdfTool('watermark', async ({bytes, view, body, name}) => {
+  let mode='text', layout='center', wmImg=null;
+  const card = h(`<div class="card"><div class="field fm" style="margin-bottom:12px"><label>ชนิดลายน้ำ</label></div>
+    <div class="tx fields"><div class="field" style="flex:2"><label>ข้อความ</label><input type="text" class="text" value="สำเนาถูกต้อง"></div>
+      <div class="field"><label>ขนาด (pt)</label><input type="number" class="size" value="60" min="8" max="300"></div>
+      <div class="field"><label>สี</label><input type="color" class="color" value="#d0342c"></div>
+      <div class="field"><label>แบบอักษร</label><select class="font">${Object.entries(FONTS).map(([k,f])=>`<option value="${k}">${f.label}</option>`).join('')}</select></div></div>
+    <div class="im" style="display:none"><div class="row"><button class="btn" data-a="pick">${svg('upload')} เลือกรูปลายน้ำ</button><span class="imname" style="color:var(--muted)"></span></div>
+      <div class="field" style="margin-top:10px"><label>ความกว้าง: <span class="sv">40</span>% ของหน้า</label><input type="range" class="scale" min="5" max="100" value="40"></div></div>
+    <div class="fields" style="margin-top:12px"><div class="field"><label>ความโปร่งใส: <span class="ov">25</span>%</label><input type="range" class="op" min="5" max="100" value="25"></div>
+      <div class="field"><label>มุมเอียง: <span class="av">45</span>°</label><input type="range" class="ang" min="-90" max="90" value="45"></div>
+      <div class="field fl"><label>การจัดวาง</label></div></div>
+    <div class="actions"><button class="btn primary" data-a="go">${svg('watermark')} ใส่ลายน้ำ</button></div></div>`);
+  $('.fm',card).appendChild(seg([['text','ข้อความ'],['image','รูปภาพ']], mode, v=>{ mode=v; $('.tx',card).style.display=v==='text'?'':'none'; $('.im',card).style.display=v==='image'?'':'none'; }));
+  $('.fl',card).appendChild(seg([['center','กลางหน้า'],['tile','เรียงเต็มหน้า']], layout, v=>layout=v));
+  $('.op',card).oninput=e=>$('.ov',card).textContent=e.target.value; $('.ang',card).oninput=e=>$('.av',card).textContent=e.target.value; $('.scale',card).oninput=e=>$('.sv',card).textContent=e.target.value;
+  $('[data-a=pick]',card).onclick = async()=>{ const [f]=await pickFiles('image/*'); if(!f) return; wmImg=await fileToImage(f); $('.imname',card).textContent=f.name; };
+  $('[data-a=go]',card).onclick = () => run('กำลังใส่ลายน้ำ…', async ()=>{
+    const op=+$('.op',card).value/100, ang=+$('.ang',card).value;
+    let png;
+    if(mode==='text'){ const t=$('.text',card).value.trim(); if(!t) throw new Error('กรุณาใส่ข้อความ'); png = await textToPng(t,{sizePt:+$('.size',card).value||60, color:$('.color',card).value, font:$('.font',card).value, bold:true, angle:ang, ratio:3}); }
+    else { if(!wmImg) throw new Error('กรุณาเลือกรูปลายน้ำ');
+      const src=imageToCanvas(wmImg,1600); const a=ang*Math.PI/180, cos=Math.abs(Math.cos(a)), sin=Math.abs(Math.sin(a));
+      const c=document.createElement('canvas'); c.width=Math.ceil(src.width*cos+src.height*sin); c.height=Math.ceil(src.width*sin+src.height*cos);
+      const x=c.getContext('2d'); x.translate(c.width/2,c.height/2); x.rotate(-a); x.drawImage(src,-src.width/2,-src.height/2);
+      png={url:c.toDataURL('image/png'), wPt:c.width, hPt:c.height, scaleW:+$('.scale',card).value/100}; }
+    const lib = await openLib(bytes); const img = await lib.embedPng(dataUrlToBytes(png.url));
+    for(const page of lib.getPages()){
+      const g=pageGeom(page); let fw=png.wPt/g.W, fh=png.hPt/g.H;
+      if(png.scaleW){ const k=png.scaleW/fw; fw*=k; fh*=k; }
+      if(fw>0.95){ const k=0.95/fw; fw*=k; fh*=k; } if(fh>0.95){ const k=0.95/fh; fw*=k; fh*=k; }
+      if(layout==='center') drawBox(page, img, 0.5-fw/2, 0.5-fh/2, fw, fh, {opacity:op});
+      else { const gx=fw*1.25, gy=fh*1.6; let row=0; for(let y=-fh/2; y<1; y+=gy, row++) for(let x=-fw/2+(row%2?gx/2:0); x<1; x+=gx) drawBox(page, img, x, y, fw, fh, {opacity:op}); }
+    }
+    await saveFile(name+'-watermark.pdf', await lib.save(), 'watermark');
+  });
+  body.appendChild(card);
+});
+
+/* ---- CROP ---- */
+VIEWS.crop = () => singlePdfTool('crop', async ({bytes, view, body, name}) => {
+  const m = {t:5,r:5,b:5,l:5}; let pg=1;
+  const card = h(`<div class="card"><div class="editor-bar"><div class="pager"><button class="btn sm" data-a="prev">${svg('left')}</button><span></span><button class="btn sm" data-a="next">${svg('right')}</button></div><div class="spacer"></div><span style="font-size:12.5px;color:var(--muted)">ลากจุดสีส้มที่มุมเพื่อกำหนดพื้นที่ที่ต้องการเก็บไว้</span></div>
+    <div class="stage-wrap"><div class="stage" style="width:min(520px,100%)"></div></div>
+    <div class="fields" style="margin-top:12px">${['t:บน','b:ล่าง','l:ซ้าย','r:ขวา'].map(s=>{const [k,l]=s.split(':'); return `<div class="field"><label>ตัดขอบ${l} (%)</label><input type="number" data-k="${k}" min="0" max="45" step="0.5" value="5"></div>`}).join('')}</div>
+    <div class="row" style="margin-top:10px"><label class="check"><input type="checkbox" class="all" checked> ใช้กับทุกหน้า</label></div>
+    <div class="actions"><button class="btn primary" data-a="go">${svg('crop')} ครอบตัดและบันทึก</button></div></div>`);
+  const stage=$('.stage',card);
+  const box=h(`<div class="cropbox"><span class="hd" data-h="tl" style="left:0;top:0"></span><span class="hd" data-h="tr" style="left:100%;top:0"></span><span class="hd" data-h="bl" style="left:0;top:100%"></span><span class="hd" data-h="br" style="left:100%;top:100%"></span></div>`);
+  const place=()=>{ Object.assign(box.style,{left:m.l+'%', top:m.t+'%', right:m.r+'%', bottom:m.b+'%'}); $$('input[data-k]',card).forEach(i=>i.value=+m[i.dataset.k].toFixed(1)); };
+  async function show(){ $('.pager span',card).textContent=`หน้า ${pg} / ${view.numPages}`; const c=await renderPage(view,pg,{width:900}); stage.innerHTML=''; stage.append(c, box);  place(); }
+  $$('.hd',box).forEach(hd=>hd.onpointerdown=e=>{ e.preventDefault(); hd.setPointerCapture(e.pointerId); const r=stage.getBoundingClientRect(); const k=hd.dataset.h;
+    hd.onpointermove=ev=>{ const x=Math.min(100,Math.max(0,(ev.clientX-r.left)/r.width*100)), y=Math.min(100,Math.max(0,(ev.clientY-r.top)/r.height*100));
+      if(k[0]==='t') m.t=Math.min(y, 100-m.b-5); else m.b=Math.min(100-y, 100-m.t-5);
+      if(k[1]==='l') m.l=Math.min(x, 100-m.r-5); else m.r=Math.min(100-x, 100-m.l-5); place(); };
+    hd.onpointerup=hd.onpointercancel=()=>hd.onpointermove=null; });
+  $$('input[data-k]',card).forEach(i=>i.oninput=()=>{ m[i.dataset.k]=Math.min(45,Math.max(0,+i.value||0)); place(); });
+  $('[data-a=prev]',card).onclick=()=>{ if(pg>1){pg--;show();} }; $('[data-a=next]',card).onclick=()=>{ if(pg<view.numPages){pg++;show();} };
+  $('[data-a=go]',card).onclick = () => run('กำลังครอบตัด…', async ()=>{
+    const lib=await openLib(bytes); const pages=lib.getPages(); const targets = $('.all',card).checked? pages : [pages[pg-1]];
+    for(const p of targets){ const g=pageGeom(p); const a=viewToPdf(g, m.l/100, m.t/100), b=viewToPdf(g, 1-m.r/100, 1-m.b/100);
+      const x=Math.min(a.x,b.x), y=Math.min(a.y,b.y), w=Math.abs(a.x-b.x), hh=Math.abs(a.y-b.y);
+      p.setMediaBox(x,y,w,hh); p.setCropBox(x,y,w,hh); }
+    await saveFile(name+'-cropped.pdf', await lib.save(), 'crop');
+  });
+  body.appendChild(card); await show();
+});
+
+/* ---- PROTECT ---- */
+VIEWS.protect = () => singlePdfTool('protect', async ({bytes, body, name}) => {
+  const card = h(`<div class="card"><div class="fields">
+    <div class="field"><label>รหัสผ่านสำหรับเปิดไฟล์</label><input type="password" class="p1" autocomplete="new-password"></div>
+    <div class="field"><label>ยืนยันรหัสผ่าน</label><input type="password" class="p2" autocomplete="new-password"></div></div>
+    <label class="check" style="margin-top:10px"><input type="checkbox" class="show"> แสดงรหัสผ่าน</label>
+    <div class="field" style="margin-top:14px"><label>สิทธิ์ของผู้ที่เปิดไฟล์</label>
+      <div class="row"><label class="check"><input type="checkbox" class="pr" checked> พิมพ์ได้</label><label class="check"><input type="checkbox" class="cp"> คัดลอกข้อความได้</label><label class="check"><input type="checkbox" class="md"> แก้ไขได้</label></div></div>
+    <div class="note warn" style="margin-top:14px">จดรหัสผ่านไว้ให้ดี หากลืมจะไม่สามารถเปิดไฟล์ได้อีก</div>
+    <div class="actions"><button class="btn primary">${svg('protect')} ล็อกไฟล์ด้วยรหัสผ่าน</button></div></div>`);
+  $('.show',card).onchange=e=>$$('input[type=password],input.pw',card).forEach(i=>{ i.type=e.target.checked?'text':'password'; i.classList.add('pw'); });
+  $('button.primary',card).onclick = () => { const p1=$('.p1',card).value, p2=$('.p2',card).value;
+    if(p1.length<4) return toast('รหัสผ่านควรยาวอย่างน้อย 4 ตัวอักษร'); if(p1!==p2) return toast('รหัสผ่านทั้งสองช่องไม่ตรงกัน');
+    run('กำลังเข้ารหัส…', async ()=>{ const lib=await openLib(bytes);
+      lib.encrypt({userPassword:p1, ownerPassword:p1+'#owner'+Math.random().toString(36).slice(2), permissions:{ printing: $('.pr',card).checked?'highResolution':undefined, copying:$('.cp',card).checked, modifying:$('.md',card).checked, annotating:$('.md',card).checked, fillingForms:true, contentAccessibility:true, documentAssembly:$('.md',card).checked }});
+      await saveFile(name+'-protected.pdf', await lib.save(), 'protect'); }); };
+  body.appendChild(card);
+});
+
+/* ---- SIGN ---- */
+function signaturePanel(onReady){
+  let mode='draw', color='#1a2b8c';
+  const el = h(`<div class="card"><div class="row" style="margin-bottom:12px"><b>สร้างลายเซ็น</b><div class="spacer"></div><span class="sm"></span></div>
+    <div class="m-draw"><canvas class="pad"></canvas><div class="row" style="margin-top:8px"><span style="font-size:13px;color:var(--muted)">สีหมึก</span><span class="inks"></span><div class="spacer"></div><button class="btn sm" data-a="clear">ล้าง</button></div></div>
+    <div class="m-type" style="display:none"><div class="fields"><div class="field" style="flex:2"><label>พิมพ์ชื่อ</label><input type="text" class="tname" placeholder="ชื่อ-นามสกุล"></div><div class="field"><label>แบบอักษร</label><select class="tfont"><option value="charm">ลายมือไทย</option><option value="dancing">ลายมืออังกฤษ</option><option value="sarabun">Sarabun</option></select></div></div>
+      <div class="tprev" style="margin-top:10px;min-height:70px;display:grid;place-items:center;background:#fff;border:1px solid var(--line);border-radius:12px"></div></div>
+    <div class="m-up" style="display:none"><div class="row"><button class="btn" data-a="up">${svg('upload')} เลือกรูปลายเซ็น</button><label class="check"><input type="checkbox" class="rmbg" checked> ลบพื้นหลังสีขาว</label></div><div class="uprev" style="margin-top:10px"></div></div>
+    <div class="saved" style="margin-top:14px;display:none"><div style="font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:6px">ลายเซ็นที่บันทึกไว้ (คลิกเพื่อใช้)</div><div class="sigs"></div></div>
+    <div class="actions"><label class="check"><input type="checkbox" class="keep" checked> จำลายเซ็นนี้ไว้ในเครื่อง</label><div class="spacer"></div><button class="btn primary" data-a="use">${svg('plus')} วางลายเซ็นลงเอกสาร</button></div></div>`);
+  $('.sm',el).appendChild(seg([['draw','วาด'],['type','พิมพ์'],['up','อัปโหลด']], mode, v=>{ mode=v; ['draw','type','up'].forEach(k=>$('.m-'+k,el).style.display=k===v?'':'none'); if(v==='draw') setupPad(); }));
+  const inks = $('.inks',el); ['#1a2b8c','#000000','#c0392b'].forEach(c=>{ const b=h(`<button style="width:24px;height:24px;border-radius:50%;border:2px solid ${c===color?'var(--brand)':'var(--line)'};background:${c};margin-left:6px;cursor:pointer"></button>`); b.onclick=()=>{ color=c; $$('button',inks).forEach(x=>x.style.borderColor='var(--line)'); b.style.borderColor='var(--brand)'; }; inks.appendChild(b); });
+  const pad=$('.pad',el); let pctx, drawn=false, ready=false;
+  function setupPad(){ const r=pad.getBoundingClientRect(); if(!r.width) return; const d=Math.min(3,window.devicePixelRatio||1)*1.5; if(ready && pad.width===Math.round(r.width*d)) return; pad.width=Math.round(r.width*d); pad.height=Math.round(r.height*d); pctx=pad.getContext('2d'); pctx.scale(d,d); pctx.lineCap='round'; pctx.lineJoin='round'; drawn=false; ready=true; }
+  let last=null, lastW=3;
+  pad.onpointerdown=e=>{ setupPad(); pad.setPointerCapture(e.pointerId); const r=pad.getBoundingClientRect(); last={x:e.clientX-r.left,y:e.clientY-r.top,t:performance.now()}; pctx.fillStyle=color; pctx.beginPath(); pctx.arc(last.x,last.y,1.4,0,7); pctx.fill(); drawn=true; };
+  pad.onpointermove=e=>{ if(!last) return; const r=pad.getBoundingClientRect(); const p={x:e.clientX-r.left,y:e.clientY-r.top,t:performance.now()}; const dist=Math.hypot(p.x-last.x,p.y-last.y); const v=dist/Math.max(1,p.t-last.t); const w=Math.max(1.4,Math.min(4.2,4.2-v*1.6)); lastW=lastW*0.6+w*0.4;
+    pctx.strokeStyle=color; pctx.lineWidth=lastW; pctx.beginPath(); pctx.moveTo(last.x,last.y); pctx.lineTo(p.x,p.y); pctx.stroke(); last=p; };
+  pad.onpointerup=pad.onpointercancel=()=>last=null;
+  $('[data-a=clear]',el).onclick=()=>{ pctx && pctx.clearRect(0,0,pad.width,pad.height); drawn=false; };
+  const tprev=$('.tprev',el); let typed=null;
+  const updType=async()=>{ const t=$('.tname',el).value.trim(); if(!t){ tprev.innerHTML=''; typed=null; return; } typed=await textToPng(t,{sizePt:30, color, font:$('.tfont',el).value, ratio:4}); tprev.innerHTML=`<img src="${typed.url}" style="max-height:70px;max-width:100%">`; };
+  $('.tname',el).oninput=updType; $('.tfont',el).onchange=updType;
+  let upl=null;
+  $('[data-a=up]',el).onclick=async()=>{ const [f]=await pickFiles('image/*'); if(!f) return; const im=await fileToImage(f); let c=imageToCanvas(im,1200);
+    if($('.rmbg',el).checked){ const x=c.getContext('2d'); const d=x.getImageData(0,0,c.width,c.height); const a=d.data; for(let i=0;i<a.length;i+=4){ const l=0.299*a[i]+0.587*a[i+1]+0.114*a[i+2]; if(l>215) a[i+3]=0; else if(l>165) a[i+3]=Math.round(a[i+3]*(215-l)/50); } x.putImageData(d,0,0); c=trimCanvas(c)||c; }
+    upl={url:c.toDataURL('image/png'), wPt:c.width/4, hPt:c.height/4}; $('.uprev',el).innerHTML=`<img src="${upl.url}" style="max-height:90px;max-width:100%;background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 0/14px 14px;border-radius:8px">`; };
+  function drawSaved(){ const sv=store.get('sigs',[]); $('.saved',el).style.display=sv.length?'':'none'; const box=$('.sigs',el); box.innerHTML='';
+    sv.forEach((s,i)=>{ const n=h(`<div class="sg"><img src="${s.url}"><button class="x">${svg('x')}</button></div>`); n.onclick=e=>{ if(e.target.closest('.x')){ sv.splice(i,1); store.set('sigs',sv); drawSaved(); return; } onReady(s); }; box.appendChild(n); }); }
+  drawSaved();
+  $('[data-a=use]',el).onclick=async()=>{
+    let s=null;
+    if(mode==='draw'){ if(!drawn) return toast('กรุณาวาดลายเซ็นก่อน'); const c=trimCanvas(pad,8); if(!c) return toast('กรุณาวาดลายเซ็นก่อน'); const d=pad.width/pad.getBoundingClientRect().width; s={url:c.toDataURL('image/png'), wPt:c.width/d*0.75, hPt:c.height/d*0.75}; }
+    else if(mode==='type'){ await updType(); if(!typed) return toast('กรุณาพิมพ์ชื่อ'); s=typed; }
+    else { if(!upl) return toast('กรุณาเลือกรูปลายเซ็น'); s=upl; }
+    if($('.keep',el).checked){ const sv=store.get('sigs',[]); if(!sv.some(x=>x.url===s.url)){ sv.unshift(s); store.set('sigs', sv.slice(0,6)); drawSaved(); } }
+    onReady(s);
+  };
+  requestAnimationFrame(setupPad); window.addEventListener('resize', ()=>{ if(!drawn) { ready=false; setupPad(); } });
+  return el;
+}
+VIEWS.sign = () => singlePdfTool('sign', async ({bytes, view, body, name}) => {
+  const ed = OverlayEditor(view);
+  const panel = signaturePanel(s => { ed.add({...s, maxW:0.35}); toast('วางลายเซ็นแล้ว ลากไปยังตำแหน่งที่ต้องการ'); ed.el.scrollIntoView({behavior:'smooth', block:'center'}); });
+  const save = h(`<div class="actions"><div class="spacer"></div><button class="btn primary">${svg('download')} บันทึกเอกสารที่เซ็นแล้ว</button></div>`);
+  $('button',save).onclick = () => { if(!ed.st.items.length) return toast('ยังไม่ได้วางลายเซ็น'); run('กำลังบันทึก…', async ()=>{ const lib=await openLib(bytes); await ed.apply(lib); await saveFile(name+'-signed.pdf', await lib.save(), 'sign'); }); };
+  const card = h(`<div class="card"></div>`); card.append(ed.el, save);
+  body.append(panel, card); await ed.show();
+});
+
+/* ---- ADD CONTENT ---- */
+VIEWS.addcontent = () => singlePdfTool('addcontent', async ({bytes, view, body, name}) => {
+  const ed = OverlayEditor(view);
+  const tb = h(`<div class="card"><div class="fields">
+      <div class="field" style="flex:3;min-width:220px"><label>ข้อความ (ขึ้นบรรทัดใหม่ได้)</label><textarea class="txt" rows="2" placeholder="พิมพ์ข้อความที่ต้องการเพิ่ม"></textarea></div>
+      <div class="field"><label>ขนาด (pt)</label><input type="number" class="size" value="14" min="5" max="120"></div>
+      <div class="field"><label>สี</label><input type="color" class="color" value="#111111"></div>
+      <div class="field"><label>แบบอักษร</label><select class="font">${Object.entries(FONTS).map(([k,f])=>`<option value="${k}">${f.label}</option>`).join('')}</select></div></div>
+    <div class="row" style="margin-top:10px"><label class="check"><input type="checkbox" class="bold"> ตัวหนา</label><div class="spacer"></div><button class="btn primary" data-a="text">${svg('plus')} เพิ่มข้อความ</button></div>
+    <div style="height:1px;background:var(--line);margin:14px 0"></div>
+    <div class="row"><span style="font-size:13px;font-weight:600;color:var(--muted)">เครื่องหมาย</span><span class="syms row" style="gap:6px"></span><div class="spacer"></div>
+      <button class="btn sm" data-a="date">วันที่วันนี้</button><button class="btn sm" data-a="img">${svg('pdf2img')} เพิ่มรูปภาพ</button></div></div>`);
+  const syms=$('.syms',tb);
+  [['check','✓'],['cross','✗'],['boxcheck','☑'],['boxcross','☒'],['box','☐'],['dot','●'],['circle','○'],['star','★']].forEach(([k,l])=>{ const b=h(`<button class="btn sm" title="${k}" style="min-width:38px;font-size:16px">${l}</button>`); b.onclick=()=>ed.add(symbolPng(k, $('.color',tb).value, Math.max(10,+$('.size',tb).value||14))); syms.appendChild(b); });
+  const opts=()=>({sizePt:+$('.size',tb).value||14, color:$('.color',tb).value, font:$('.font',tb).value, bold:$('.bold',tb).checked});
+  $('[data-a=text]',tb).onclick=async()=>{ const t=$('.txt',tb).value; if(!t.trim()) return toast('กรุณาพิมพ์ข้อความ'); ed.add({...(await textToPng(t, opts())), maxW:0.95}); };
+  $('[data-a=date]',tb).onclick=async()=>{ const d=new Date(); const m=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+    ed.add({...(await textToPng(`${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()+543}`, opts())), maxW:0.9}); };
+  $('[data-a=img]',tb).onclick=async()=>{ const [f]=await pickFiles('image/*'); if(!f) return; const c=imageToCanvas(await fileToImage(f),1800); ed.add({url:c.toDataURL('image/png'), wPt:c.width*0.5, hPt:c.height*0.5, maxW:0.5}); };
+  const save = h(`<div class="actions"><div class="spacer"></div><button class="btn primary">${svg('download')} บันทึก PDF</button></div>`);
+  $('button',save).onclick = () => { if(!ed.st.items.length) return toast('ยังไม่ได้เพิ่มข้อมูลใด ๆ'); run('กำลังบันทึก…', async ()=>{ const lib=await openLib(bytes); await ed.apply(lib); await saveFile(name+'-edited.pdf', await lib.save(), 'addcontent'); }); };
+  const card = h(`<div class="card"></div>`); card.append(ed.el, save);
+  body.append(tb, card); await ed.show();
+});
+
+/* ---- SCAN ---- */
+function enhanceCanvas(src, mode){
+  if(mode==='original') return src;
+  const w=src.width, hh=src.height; const ctx=src.getContext('2d', {willReadFrequently:true}); const img=ctx.getImageData(0,0,w,hh); const a=img.data;
+  // illumination estimate: downscale, max-filter (removes dark text), upscale smoothly
+  const sw=Math.max(8,Math.round(w/28)), sh=Math.max(8,Math.round(hh/28));
+  const sm=document.createElement('canvas'); sm.width=sw; sm.height=sh; const sx=sm.getContext('2d',{willReadFrequently:true}); sx.imageSmoothingQuality='high'; sx.drawImage(src,0,0,sw,sh);
+  const sd=sx.getImageData(0,0,sw,sh); const s=sd.data; const cp=new Uint8ClampedArray(s);
+  for(let y=0;y<sh;y++) for(let x=0;x<sw;x++){ for(let c=0;c<3;c++){ let m=0; for(let dy=-2;dy<=2;dy++) for(let dx=-2;dx<=2;dx++){ const xx=Math.min(sw-1,Math.max(0,x+dx)), yy=Math.min(sh-1,Math.max(0,y+dy)); const v=cp[(yy*sw+xx)*4+c]; if(v>m)m=v; } s[(y*sw+x)*4+c]=m; } }
+  sx.putImageData(sd,0,0);
+  const bg=document.createElement('canvas'); bg.width=w; bg.height=hh; const bx=bg.getContext('2d',{willReadFrequently:true}); bx.imageSmoothingQuality='high'; bx.filter='blur(2px)'; bx.drawImage(sm,0,0,w,hh);
+  const b=bx.getImageData(0,0,w,hh).data;
+  for(let i=0;i<a.length;i+=4){
+    let r=Math.min(255,a[i]/Math.max(1,b[i])*255), g=Math.min(255,a[i+1]/Math.max(1,b[i+1])*255), bl=Math.min(255,a[i+2]/Math.max(1,b[i+2])*255);
+    if(mode==='color'){ // gentle contrast
+      const k=1.25; r=(r-255)*k+255; g=(g-255)*k+255; bl=(bl-255)*k+255; a[i]=r; a[i+1]=g; a[i+2]=bl;
+    } else { let l=0.299*r+0.587*g+0.114*bl;
+      if(mode==='gray'){ l=(l-255)*1.4+255; a[i]=a[i+1]=a[i+2]=l; }
+      else { const v = l<150? 0 : l>205? 255 : (l-150)/55*255; a[i]=a[i+1]=a[i+2]=v; } }
+  }
+  const out=document.createElement('canvas'); out.width=w; out.height=hh; out.getContext('2d').putImageData(img,0,0); return out;
+}
+const FULL_QUAD = () => [{x:0,y:0},{x:1,y:0},{x:1,y:1},{x:0,y:1}];
+function rotatedCanvas(im, rot, maxDim){
+  const sw=im.naturalWidth||im.width, sh=im.naturalHeight||im.height; const k=Math.min(1, maxDim/Math.max(sw,sh));
+  const W=Math.round(sw*k), H=Math.round(sh*k);
+  const c=document.createElement('canvas'); c.width = rot%180? H:W; c.height = rot%180? W:H;
+  const x=c.getContext('2d',{willReadFrequently:true}); x.imageSmoothingQuality='high';
+  x.translate(c.width/2,c.height/2); x.rotate(rot*Math.PI/180); x.drawImage(im,-W/2,-H/2,W,H); return c;
+}
+const isFullQuad = q => q.every((p,i)=>{ const f=FULL_QUAD()[i]; return Math.abs(p.x-f.x)<0.002 && Math.abs(p.y-f.y)<0.002; });
+/* rotate normalized quad points 90° steps, keeping TL,TR,BR,BL order */
+function rotateQuad(q, d){
+  return orderQuad(q.map(p=> d>0 ? {x:1-p.y, y:p.x} : {x:p.y, y:1-p.x}));
+}
+function orderQuad(pts){
+  const s=pts.map(p=>p.x+p.y), df=pts.map(p=>p.x-p.y);
+  const tl=pts[s.indexOf(Math.min(...s))], br=pts[s.indexOf(Math.max(...s))], tr=pts[df.indexOf(Math.max(...df))], bl=pts[df.indexOf(Math.min(...df))];
+  return [tl,tr,br,bl].map(p=>({...p}));
+}
+/* perspective warp: map quad (normalized coords in src) to an upright rectangle */
+function warpQuad(src, quad, maxDim=2400){
+  const P=quad.map(p=>({x:p.x*src.width, y:p.y*src.height}));
+  const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+  let ow=Math.max(d(P[0],P[1]), d(P[3],P[2])), oh=Math.max(d(P[0],P[3]), d(P[1],P[2]));
+  const k=Math.min(1, maxDim/Math.max(ow,oh)); ow=Math.max(8,Math.round(ow*k)); oh=Math.max(8,Math.round(oh*k));
+  const [x0,x1,x2,x3]=P.map(p=>p.x), [y0,y1,y2,y3]=P.map(p=>p.y);
+  const dx1=x1-x2, dx2=x3-x2, dx3=x0-x1+x2-x3, dy1=y1-y2, dy2=y3-y2, dy3=y0-y1+y2-y3;
+  let g=0, hh=0; const det=dx1*dy2-dx2*dy1;
+  if((Math.abs(dx3)>1e-9||Math.abs(dy3)>1e-9) && Math.abs(det)>1e-9){ g=(dx3*dy2-dx2*dy3)/det; hh=(dx1*dy3-dx3*dy1)/det; }
+  const a=x1-x0+g*x1, b=x3-x0+hh*x3, c=x0, dd=y1-y0+g*y1, e=y3-y0+hh*y3, f=y0;
+  const sd=src.getContext('2d',{willReadFrequently:true}).getImageData(0,0,src.width,src.height); const S=sd.data, SW=src.width, SH=src.height;
+  const out=document.createElement('canvas'); out.width=ow; out.height=oh; const ox=out.getContext('2d',{willReadFrequently:true}); const od=ox.createImageData(ow,oh); const O=od.data;
+  for(let v=0; v<oh; v++){ const t=(v+0.5)/oh;
+    for(let u=0; u<ow; u++){ const s=(u+0.5)/ow; const z=g*s+hh*t+1;
+      let sx=(a*s+b*t+c)/z-0.5, sy=(dd*s+e*t+f)/z-0.5;
+      if(sx<0)sx=0; if(sy<0)sy=0; if(sx>SW-1.001)sx=SW-1.001; if(sy>SH-1.001)sy=SH-1.001;
+      const ix=sx|0, iy=sy|0, fx=sx-ix, fy=sy-iy; const i00=(iy*SW+ix)*4, i10=i00+4, i01=i00+SW*4, i11=i01+4; const o=(v*ow+u)*4;
+      for(let ch=0; ch<3; ch++){ const top=S[i00+ch]+(S[i10+ch]-S[i00+ch])*fx, bot=S[i01+ch]+(S[i11+ch]-S[i01+ch])*fx; O[o+ch]=top+(bot-top)*fy; }
+      O[o+3]=255; } }
+  ox.putImageData(od,0,0); return out;
+}
+/* simple document-edge detection: brightest large region → 4 extreme corners */
+function detectQuad(src){
+  const k=Math.min(1, 320/Math.max(src.width,src.height)); const w=Math.max(8,Math.round(src.width*k)), h=Math.max(8,Math.round(src.height*k));
+  const c=document.createElement('canvas'); c.width=w; c.height=h; const x=c.getContext('2d',{willReadFrequently:true}); x.filter='blur(1.5px)'; x.drawImage(src,0,0,w,h);
+  const d=x.getImageData(0,0,w,h).data; const N=w*h; const L=new Uint8Array(N), hist=new Array(256).fill(0);
+  for(let i=0;i<N;i++){ const r=d[i*4],g=d[i*4+1],b=d[i*4+2]; const mx=Math.max(r,g,b), mn=Math.min(r,g,b); const l=Math.round(0.299*r+0.587*g+0.114*b - (mx-mn)*0.35); L[i]=Math.max(0,Math.min(255,l)); hist[L[i]]++; }
+  let sum=0; for(let i=0;i<256;i++) sum+=i*hist[i]; let sB=0,wB=0,best=0,th=128;
+  for(let t=0;t<256;t++){ wB+=hist[t]; if(!wB) continue; const wF=N-wB; if(!wF) break; sB+=t*hist[t]; const mB=sB/wB, mF=(sum-sB)/wF; const v=wB*wF*(mB-mF)**2; if(v>best){best=v; th=t;} }
+  if(best/N/N < 60) return null;
+  const lab=new Int32Array(N).fill(-1); let bestArea=0, bestId=-1; const stack=[]; let id=0;
+  for(let i=0;i<N;i++){ if(L[i]<=th || lab[i]!==-1) continue; let area=0; stack.push(i); lab[i]=id;
+    while(stack.length){ const p=stack.pop(); area++; const px=p%w, py=(p/w)|0;
+      if(px>0 && L[p-1]>th && lab[p-1]<0){lab[p-1]=id; stack.push(p-1);} if(px<w-1 && L[p+1]>th && lab[p+1]<0){lab[p+1]=id; stack.push(p+1);}
+      if(py>0 && L[p-w]>th && lab[p-w]<0){lab[p-w]=id; stack.push(p-w);} if(py<h-1 && L[p+w]>th && lab[p+w]<0){lab[p+w]=id; stack.push(p+w);} }
+    if(area>bestArea){bestArea=area; bestId=id;} id++; }
+  if(bestArea < N*0.12 || bestArea > N*0.97) return null;
+  let tl,tr,br,bl, a1=Infinity,a2=-Infinity,a3=-Infinity,a4=Infinity;
+  for(let i=0;i<N;i++){ if(lab[i]!==bestId) continue; const px=i%w, py=(i/w)|0; const s=px+py, df=px-py;
+    if(s<a1){a1=s; tl=[px,py];} if(s>a2){a2=s; br=[px,py];} if(df>a3){a3=df; tr=[px,py];} if(df<a4){a4=df; bl=[px,py];} }
+  const q=[tl,tr,br,bl].map(([px,py])=>({x:Math.min(1,Math.max(0,(px+0.5)/w)), y:Math.min(1,Math.max(0,(py+0.5)/h))}));
+  const area=Math.abs(q.reduce((s,p,i)=>{ const n=q[(i+1)%4]; return s+p.x*n.y-n.x*p.y; },0))/2;
+  if(area<=0.1) return null;
+  const cx=q.reduce((s,p)=>s+p.x,0)/4, cy=q.reduce((s,p)=>s+p.y,0)/4;   // pull corners ~1.2% inward to avoid background slivers
+  return q.map(p=>({x:p.x+(cx-p.x)*0.024, y:p.y+(cy-p.y)*0.024}));
+}
+function scanProcess(item, maxDim=2400){
+  const rc = rotatedCanvas(item.img, item.rot, maxDim);
+  const out = isFullQuad(item.quad) ? rc : warpQuad(rc, item.quad, maxDim);
+  return enhanceCanvas(out, item.mode);
+}
+VIEWS.scan = () => {
+  const {el, body} = toolPage('scan');
+  const items=[]; let size='a4';
+  const card = h(`<div class="card" style="display:none"><div class="note" style="margin-bottom:12px">ระบบตรวจจับขอบกระดาษให้อัตโนมัติ · แตะรูปเพื่อลากมุมทั้ง 4 ให้ตรงขอบเอกสาร (เอียงได้) · ลากเพื่อเรียงลำดับหน้า</div><div class="scanlist list"></div>
+    <div class="fields" style="margin-top:14px"><div class="field fs"><label>ขนาดหน้า</label></div><div class="field fm"><label>ปรับทุกหน้าเป็น</label></div></div>
+    <div class="actions"><button class="btn" data-a="add">${svg('plus')} เพิ่มหน้า</button><div class="spacer"></div><button class="btn primary" data-a="go">${svg('scan')} สร้าง PDF</button></div></div>`);
+  const MODES=[['color','สีคมชัด (ลบเงา)'],['gray','ขาวดำเทา'],['bw','ขาว-ดำ เอกสาร'],['original','ต้นฉบับ']];
+  $('.fs',card).appendChild(seg([['a4','A4'],['letter','Letter'],['fit','ตามขนาดภาพ']], size, v=>size=v));
+  $('.fm',card).appendChild(seg(MODES, '', v=>{ items.forEach(it=>it.mode=v); items.forEach(refreshThumb); }));
+  const list=$('.list',card); Sortable.create(list,{animation:180, filter:'.tools button', preventOnFilter:false, delay:120, delayOnTouchOnly:true});
+  function refreshThumb(it){ const c=scanProcess({...it, img:it.thumbImg}, 700); const slot=$('.cv',it.cell); slot.innerHTML=''; const t=imageToCanvas(c,300); t.className='fadein'; t.style.maxWidth='100%'; t.style.maxHeight='150px'; t.style.boxShadow='0 1px 4px rgba(0,0,0,.18)'; slot.appendChild(t); }
+  async function add(fs){ fs=fs.filter(isImg); if(!fs.length) return toast('กรุณาเลือกรูปภาพ');
+    await run('กำลังตรวจจับขอบเอกสาร…', async()=>{ for(const f of fs){ const img=await fileToImage(f); const tc=imageToCanvas(img,1100); const thumbImg=await loadImage(tc.toDataURL('image/jpeg',0.88));
+      const it={id:Math.random().toString(36).slice(2), img, thumbImg, rot:0, mode:'color', quad: detectQuad(tc) || FULL_QUAD()};
+      it.cell=h(`<div class="pg" data-id="${it.id}" style="cursor:pointer"><div class="tools"><button data-a="del" title="ลบ">${svg('trash')}</button></div><div class="cv"></div><div class="num">แตะเพื่อแก้ไข</div></div>`);
+      $('[data-a=del]',it.cell).onclick=e=>{ e.stopPropagation(); items.splice(items.indexOf(it),1); it.cell.remove(); card.style.display=items.length?'':'none'; };
+      it.cell.onclick=e=>{ if(!e.target.closest('.tools')) editScan(it); };
+      items.push(it); list.appendChild(it.cell); refreshThumb(it); } card.style.display=''; });
+  }
+  function editScan(it){
+    const tmp={rot:it.rot, mode:it.mode, quad:it.quad.map(p=>({...p}))};
+    const m=h(`<div class="modal"><div class="box">
+      <div class="row" style="margin-bottom:10px"><b>ครอบตัดเอกสาร</b><div class="spacer"></div><button class="btn sm" data-a="rl" title="หมุนซ้าย">${svg('rotl')}</button><button class="btn sm" data-a="rr" title="หมุนขวา">${svg('rot')}</button></div>
+      <div class="scan-edit"><div class="stage-wrap"><div class="stage qstage"></div></div><div class="prev"></div></div>
+      <div class="row" style="margin-top:12px;gap:8px"><button class="btn sm" data-a="auto">✨ ตรวจจับขอบอัตโนมัติ</button><button class="btn sm" data-a="full">ใช้ทั้งภาพ</button><div class="spacer"></div><span style="font-size:12.5px;color:var(--muted)">ลากจุดมุมหรือขอบให้ตรงกับกระดาษ</span></div>
+      <div class="row md" style="margin-top:10px"></div>
+      <div class="actions"><div class="spacer"></div><button class="btn" data-a="cancel">ยกเลิก</button><button class="btn primary" data-a="ok">ตกลง</button></div></div></div>`);
+    const stage=$('.stage',m), prev=$('.prev',m);
+    const NS='http://www.w3.org/2000/svg';
+    const ov=document.createElementNS(NS,'svg'); ov.setAttribute('class','qsvg'); ov.setAttribute('viewBox','0 0 1 1'); ov.setAttribute('preserveAspectRatio','none');
+    ov.innerHTML=`<path class="qshade" fill-rule="evenodd"/><polygon class="qline"/><line class="qgrid"/><line class="qgrid"/><line class="qgrid"/><line class="qgrid"/>`;
+    const corners=[0,1,2,3].map(i=>h(`<span class="qh corner" data-i="${i}"></span>`));
+    const edges=[0,1,2,3].map(i=>h(`<span class="qh edge" data-e="${i}"></span>`));
+    const loupe=h(`<div class="loupe"><canvas width="240" height="240"></canvas></div>`);
+    let srcCanvas=null;
+    const lerp=(a,b,t)=>({x:a.x+(b.x-a.x)*t, y:a.y+(b.y-a.y)*t});
+    function place(){
+      const q=tmp.quad;
+      $('.qshade',ov).setAttribute('d',`M0 0H1V1H0Z M${q.map(p=>`${p.x} ${p.y}`).join(' L')}Z`);
+      $('.qline',ov).setAttribute('points',q.map(p=>`${p.x},${p.y}`).join(' '));
+      const gl=$$('.qgrid',ov); [[1/3,0],[2/3,0],[1/3,1],[2/3,1]].forEach(([t,dir],k)=>{
+        const a = dir? lerp(q[0],q[3],t) : lerp(q[0],q[1],t), b = dir? lerp(q[1],q[2],t) : lerp(q[3],q[2],t);
+        gl[k].setAttribute('x1',a.x); gl[k].setAttribute('y1',a.y); gl[k].setAttribute('x2',b.x); gl[k].setAttribute('y2',b.y); });
+      corners.forEach((n,i)=>{ n.style.left=q[i].x*100+'%'; n.style.top=q[i].y*100+'%'; });
+      edges.forEach((n,i)=>{ const j=(i+1)%4; const p=lerp(q[i],q[j],0.5); n.style.left=p.x*100+'%'; n.style.top=p.y*100+'%';
+        const ang=Math.atan2((q[j].y-q[i].y)*stage.clientHeight,(q[j].x-q[i].x)*stage.clientWidth); n.style.transform=`translate(-50%,-50%) rotate(${ang}rad)`; });
+    }
+    let pt;
+    const updPrev=()=>{ clearTimeout(pt); pt=setTimeout(()=>{ const c=scanProcess({...tmp, img:it.thumbImg}, 700); const t=imageToCanvas(c,500); t.className='fadein';
+      prev.innerHTML='<div class="prev-label">ตัวอย่างผลลัพธ์</div>'; prev.appendChild(t); }, 80); };
+    function drawStage(){
+      srcCanvas=rotatedCanvas(it.thumbImg, tmp.rot, 1100); srcCanvas.className='qimg';
+      const avail=Math.min(620,(stage.parentElement.clientWidth||560)-32); stage.style.width=Math.max(160,Math.min(avail, 0.56*innerHeight*srcCanvas.width/srcCanvas.height))+'px';
+      stage.innerHTML=''; stage.append(srcCanvas, ov, ...edges, ...corners, loupe); place(); updPrev();
+    }
+    function showLoupe(p){
+      const lx=$('canvas',loupe).getContext('2d'); const sz=240/3;
+      const cx=p.x*srcCanvas.width, cy=p.y*srcCanvas.height;
+      lx.fillStyle='#222'; lx.fillRect(0,0,240,240);
+      lx.drawImage(srcCanvas, cx-sz/2, cy-sz/2, sz, sz, 0, 0, 240, 240);
+      lx.strokeStyle='#ff6b43'; lx.lineWidth=3; lx.beginPath(); lx.moveTo(120,92); lx.lineTo(120,148); lx.moveTo(92,120); lx.lineTo(148,120); lx.stroke();
+      loupe.classList.add('on'); loupe.style.left=(p.x<0.5? 75:25)+'%'; loupe.style.top=(p.y<0.3? 75:22)+'%';
+    }
+    const clamp=v=>Math.min(1,Math.max(0,v));
+    function dragHandle(n, onMove){
+      n.onpointerdown=e=>{ e.preventDefault(); e.stopPropagation(); n.setPointerCapture(e.pointerId); n.classList.add('drag'); stage.classList.add('dragging');
+        const r=stage.getBoundingClientRect(); const start={x:(e.clientX-r.left)/r.width, y:(e.clientY-r.top)/r.height}; const orig=tmp.quad.map(p=>({...p}));
+        n.onpointermove=ev=>{ const cur={x:(ev.clientX-r.left)/r.width, y:(ev.clientY-r.top)/r.height}; onMove(cur, {x:cur.x-start.x, y:cur.y-start.y}, orig); place(); };
+        n.onpointerup=n.onpointercancel=()=>{ n.onpointermove=null; n.classList.remove('drag'); stage.classList.remove('dragging'); loupe.classList.remove('on'); updPrev(); };
+      };
+    }
+    corners.forEach((n,i)=>dragHandle(n,(cur)=>{ tmp.quad[i]={x:clamp(cur.x), y:clamp(cur.y)}; showLoupe(tmp.quad[i]); }));
+    edges.forEach((n,i)=>dragHandle(n,(cur,dl,orig)=>{ const j=(i+1)%4; tmp.quad[i]={x:clamp(orig[i].x+dl.x), y:clamp(orig[i].y+dl.y)}; tmp.quad[j]={x:clamp(orig[j].x+dl.x), y:clamp(orig[j].y+dl.y)}; showLoupe(lerp(tmp.quad[i],tmp.quad[j],.5)); }));
+    $('.md',m).appendChild(seg(MODES, tmp.mode, v=>{ tmp.mode=v; updPrev(); }));
+    const rotate=d=>{ tmp.rot=(tmp.rot+d+360)%360; tmp.quad=rotateQuad(tmp.quad, d); drawStage(); };
+    $('[data-a=rl]',m).onclick=()=>rotate(-90); $('[data-a=rr]',m).onclick=()=>rotate(90);
+    const snapTo=q=>{ tmp.quad=q; stage.classList.add('snap'); place(); setTimeout(()=>stage.classList.remove('snap'),350); updPrev(); };
+    $('[data-a=auto]',m).onclick=()=>{ const q=detectQuad(srcCanvas); if(!q) return toast('ตรวจไม่พบขอบกระดาษ ลองลากมุมเองได้เลย'); snapTo(q); };
+    $('[data-a=full]',m).onclick=()=>snapTo(FULL_QUAD());
+    const close=()=>{ m.classList.add('out'); setTimeout(()=>m.remove(),180); };
+    $('[data-a=cancel]',m).onclick=close;
+    $('[data-a=ok]',m).onclick=()=>{ it.rot=tmp.rot; it.quad=tmp.quad; it.mode=tmp.mode; refreshThumb(it); close(); };
+    m.onclick=e=>{ if(e.target===m) close(); };
+    document.body.appendChild(m); drawStage();
+    const onR=()=>{ if(!m.isConnected) return removeEventListener('resize',onR); drawStage(); }; addEventListener('resize',onR);
+  }
+  $('[data-a=add]',card).onclick=async()=>add(await pickFiles('image/*',true));
+  $('[data-a=go]',card).onclick=()=>run('กำลังสร้าง PDF…', async()=>{ const order=$$('.pg',list).map(c=>items.find(i=>i.id===c.dataset.id)); const cs=[];
+    for(const [k,it] of order.entries()){ busy.progress(k/order.length/2, `กำลังปรับภาพ ${k+1}/${order.length}`); await nextFrame(); cs.push(scanProcess(it)); }
+    await saveFile(`scan-${new Date().toISOString().slice(0,10)}.pdf`, await imagesToPdf(cs,{size, orient:'auto', margin:0}), 'scan'); });
+  body.append(
+    dropZone({accept:'image/*', multiple:true, capture:false, title:'ถ่ายรูปหรือเลือกรูปเอกสาร', hint:'บนมือถือจะเลือกถ่ายจากกล้องได้ · เลือกได้หลายรูป', onFiles:add}),
+    h('<div style="height:14px"></div>'), card);
+  return el;
+};
+
+/* ============ HOME / TOOLS / RECENT / PREFS ============ */
+let cardIdx=0;
+function toolCard(t){ const b=h(`<button class="tool" data-go="${t.id}" style="--i:${cardIdx++};--c:${CATS[t.cat].color}">${toolIcon(t)}<div><b>${t.name}</b><span>${t.desc}</span></div></button>`); return b; }
+VIEWS.home = () => {
+  const el = h(`<section>
+    <div class="hero"><div class="deco"></div><h1>จัดการ PDF ได้ทุกอย่าง <em>ในที่เดียว</em></h1>
+      <p>รวม แยก ลดขนาด แปลงไฟล์ เซ็นเอกสาร และอีกมากมาย ใช้งานฟรี ไม่ต้องสมัครสมาชิก</p>
+      <div class="badges"><span class="badge"><i></i>ประมวลผลในเครื่องของคุณ 100%</span><span class="badge">ไฟล์ไม่ถูกอัปโหลดไปที่ใด</span><span class="badge">รองรับภาษาไทย</span><span class="badge">${TOOLS.length} เครื่องมือ</span></div></div>
+    <label class="search">${svg('search')}<input type="search" placeholder="ค้นหาเครื่องมือ เช่น รวมไฟล์, ลายน้ำ, เซ็น…"></label>
+    <div class="cats"></div>
+    <footer>PDF Kit by <b class="sig">Nutchapon Claude AI</b> · ทุกไฟล์ประมวลผลบนอุปกรณ์ของคุณเท่านั้น</footer></section>`);
+  const cats=$('.cats',el);
+  const draw=(q='')=>{ cats.innerHTML=''; cardIdx=0; q=q.trim().toLowerCase();
+    Object.entries(CATS).forEach(([k,c])=>{ const ts=TOOLS.filter(t=>t.cat===k && (!q || (t.name+t.desc+t.id).toLowerCase().includes(q))); if(!ts.length) return;
+      cats.appendChild(h(`<div class="sec-title">${c.name}</div>`)); const g=h(`<div class="grid"></div>`); ts.forEach(t=>g.appendChild(toolCard(t))); cats.appendChild(g); });
+    if(!cats.children.length) cats.appendChild(h(`<div class="empty">ไม่พบเครื่องมือที่ค้นหา</div>`)); };
+  $('input',el).oninput=e=>draw(e.target.value); draw();
+  return el;
+};
+VIEWS.tools = () => {
+  const el=h(`<section><div class="tool-head"><div><h2>เครื่องมือทั้งหมด</h2><p>${TOOLS.length} เครื่องมือ · ทำงานในเบราว์เซอร์ทั้งหมด</p></div></div><div class="grid"></div></section>`);
+  cardIdx=0; TOOLS.forEach(t=>$('.grid',el).appendChild(toolCard(t))); return el;
+};
+VIEWS.recent = () => {
+  const r=store.get('recent',[]);
+  const el=h(`<section><div class="tool-head"><div><h2>ล่าสุด</h2><p>ประวัติไฟล์ที่สร้างบนอุปกรณ์นี้ (บันทึกเฉพาะชื่อไฟล์ ไม่เก็บตัวไฟล์)</p></div><div class="spacer"></div></div><div class="card list" style="padding:4px 12px"></div></section>`);
+  const list=$('.list',el);
+  if(!r.length) list.appendChild(h(`<div class="empty">ยังไม่มีประวัติการใช้งาน<br><button class="btn primary" style="margin-top:12px" data-go="home">เริ่มใช้เครื่องมือ</button></div>`));
+  r.forEach(x=>{ const t=T[x.tool]; if(!t) return; const d=new Date(x.t);
+    list.appendChild(h(`<div class="recent-item">${toolIcon(t)}<div class="meta"><b>${esc(x.name)}</b><span>${t.name} · ${x.size?fmtSize(x.size)+' · ':''}${d.toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'})}</span></div><button class="btn sm" data-go="${t.id}">ใช้อีกครั้ง</button></div>`)); });
+  return el;
+};
+VIEWS.prefs = () => {
+  const el=h(`<section><div class="tool-head"><div><h2>ตั้งค่า</h2><p>การตั้งค่าเก็บไว้ในเบราว์เซอร์นี้เท่านั้น</p></div></div>
+    <div class="card"><div class="field th"><label>ธีม</label></div></div>
+    <div class="card"><b>ข้อมูลในเครื่อง</b><p style="color:var(--muted);font-size:13.5px;margin:4px 0 12px">ลบประวัติการใช้งานและลายเซ็นที่บันทึกไว้</p><div class="row"><button class="btn" data-a="r">ล้างประวัติล่าสุด</button><button class="btn" data-a="s">ลบลายเซ็นที่บันทึกไว้</button></div></div>
+    <div class="card"><b>ความเป็นส่วนตัว</b><p style="color:var(--muted);font-size:13.5px;margin:4px 0 0">เครื่องมือทุกตัวประมวลผลไฟล์ภายในเบราว์เซอร์ของคุณ ไม่มีการส่งไฟล์ไปยังเซิร์ฟเวอร์ ปิดหน้านี้แล้วข้อมูลไฟล์จะหายไปทันที</p></div></section>`);
+  $('.th',el).appendChild(seg([['auto','ตามระบบ'],['light','สว่าง'],['dark','มืด']], store.get('theme','auto'), v=>{ store.set('theme',v); applyTheme(); }));
+  $('[data-a=r]',el).onclick=()=>{ store.set('recent',[]); toast('ล้างประวัติแล้ว'); };
+  $('[data-a=s]',el).onclick=()=>{ store.set('sigs',[]); toast('ลบลายเซ็นแล้ว'); };
+  return el;
+};
+
+/* ============ shell / router ============ */
+const NAV=[['home','หน้าแรก'],['tools','เครื่องมือ'],['scan','สแกน'],['recent','ล่าสุด'],['prefs','ตั้งค่า']];
+$('#nav').innerHTML = '<span class="pill"></span>' + NAV.map(([k,l])=>`<button data-go="${k}" class="${k==='scan'?'scanbtn':''}">${svg(k==='scan'?'scan':k)}<span>${l}</span></button>`).join('');
+function applyTheme(){ const p=store.get('theme','auto'); const dark = p==='dark' || (p==='auto' && matchMedia('(prefers-color-scheme: dark)').matches); document.documentElement.dataset.theme = dark?'dark':'light'; $('#themeBtn').innerHTML = svg(dark?'sun':'moon'); }
+$('#themeBtn').onclick=()=>{ const dark=document.documentElement.dataset.theme==='dark'; store.set('theme', dark?'light':'dark'); applyTheme(); };
+try{ matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme); }catch(e){}
+applyTheme();
+let current=null;
+function go(id){ if(!VIEWS[id]) id='home'; if(location.hash.slice(1)!==id){ try{ location.hash=id; }catch(e){} } if(current!==id) render(id); }
+function render(id){
+  if(!VIEWS[id]) id='home'; current=id; const v=$('#view'); v.innerHTML='';
+  try{ v.appendChild(VIEWS[id]()); }catch(e){ console.error(e); v.appendChild(h(`<div class="empty">เปิดเครื่องมือไม่ได้: ${esc(e.message)}</div>`)); }
+  $$('#nav button').forEach(b=>b.classList.toggle('on', b.dataset.go===id || (id!=='home'&&id!=='recent'&&id!=='prefs'&&id!=='scan'&&b.dataset.go==='tools')));
+  movePill(); window.scrollTo(0,0); document.title = (T[id]? T[id].name+' — ' : '') + 'PDF Kit by Nutchapon Claude AI';
+}
+function movePill(){ const on=$('#nav button.on'), pill=$('#nav .pill'); if(!pill) return; if(!on){ pill.style.opacity=0; return; } pill.style.opacity=1; pill.style.left=on.offsetLeft+'px'; pill.style.width=on.offsetWidth+'px'; }
+addEventListener('resize', movePill);
+addEventListener('scroll', ()=>$('header.top').classList.toggle('scrolled', scrollY>8), {passive:true});
+document.addEventListener('pointermove', e=>{ const t=e.target.closest && e.target.closest('.tool'); if(!t) return; const r=t.getBoundingClientRect(); t.style.setProperty('--mx',(e.clientX-r.left)+'px'); t.style.setProperty('--my',(e.clientY-r.top)+'px'); }, {passive:true});
+document.addEventListener('pointerdown', e=>{ const b=e.target.closest && e.target.closest('.btn,.tool,nav.bottom button'); if(!b || b.disabled) return; const r=b.getBoundingClientRect(); const d=Math.max(r.width,r.height)*2.2; const s=document.createElement('span'); s.className='ripple'; Object.assign(s.style,{width:d+'px',height:d+'px',left:(e.clientX-r.left-d/2)+'px',top:(e.clientY-r.top-d/2)+'px'}); b.appendChild(s); setTimeout(()=>s.remove(),650); });
+document.addEventListener('click', e=>{ const g=e.target.closest('[data-go]'); if(g){ e.preventDefault(); go(g.dataset.go); } });
+window.addEventListener('hashchange', ()=>{ const id=location.hash.slice(1)||'home'; if(id!==current) render(id); });
+window.addEventListener('popstate', ()=>{ const id=location.hash.slice(1)||'home'; if(id!==current) render(id); });
+if(!window.pdfjsLib || !window.PDFLib){ $('#view').innerHTML='<div class="empty">โหลดไลบรารีไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ตแล้วรีเฟรชหน้า</div>'; }
+else render(location.hash.slice(1)||'home');
+</script>
+</body>
+</html>
